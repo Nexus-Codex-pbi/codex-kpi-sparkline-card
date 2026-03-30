@@ -1,0 +1,127 @@
+{
+    "dataRoles": [
+        {
+            "displayName": "Value",
+            "name": "measure",
+            "kind": "Measure",
+            "requiredTypes": [{ "numeric": true }, { "text": true }]
+        },
+        {
+            "displayName": "Target",
+            "name": "target",
+            "kind": "Measure",
+            "requiredTypes": [{ "numeric": true }]
+        },
+        {
+            "displayName": "Sparkline Values",
+            "name": "sparkline",
+            "kind": "Measure",
+            "requiredTypes": [{ "numeric": true }]
+        },
+        {
+            "displayName": "Sparkline Category",
+            "name": "sparklineCategory",
+            "kind": "Grouping"
+        }
+    ],
+    "objects": {
+        "valueCard": {
+            "properties": {
+                "fontSize": {
+                    "type": { "numeric": true }
+                },
+                "valueColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "labelColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "backgroundColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "displayUnits": {
+                    "type": { "numeric": true }
+                },
+                "decimalPlaces": {
+                    "type": { "numeric": true }
+                },
+                "showLabel": {
+                    "type": { "bool": true }
+                },
+                "labelText": {
+                    "type": { "text": true }
+                }
+            }
+        },
+        "targetCard": {
+            "properties": {
+                "showTarget": {
+                    "type": { "bool": true }
+                },
+                "positiveColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "negativeColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "varianceType": {
+                    "type": {
+                        "enumeration": [
+                            { "displayName": "Percentage", "value": "percentage" },
+                            { "displayName": "Absolute", "value": "absolute" },
+                            { "displayName": "Both", "value": "both" }
+                        ]
+                    }
+                }
+            }
+        },
+        "sparklineCard": {
+            "properties": {
+                "showSparkline": {
+                    "type": { "bool": true }
+                },
+                "sparklineColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "lineWidth": {
+                    "type": { "numeric": true }
+                },
+                "showArea": {
+                    "type": { "bool": true }
+                }
+            }
+        }
+    },
+    "dataViewMappings": [
+        {
+            "categorical": {
+                "categories": {
+                    "for": { "in": "sparklineCategory" },
+                    "dataReductionAlgorithm": {
+                        "top": { "count": 100 }
+                    }
+                },
+                "values": {
+                    "select": [
+                        { "bind": { "to": "measure" } },
+                        { "bind": { "to": "target" } },
+                        { "bind": { "to": "sparkline" } }
+                    ]
+                }
+            }
+        }
+    ],
+    "supportsHighlight": true,
+    "supportsKeyboardFocus": true,
+    "supportsLandingPage": true,
+    "supportsEmptyDataView": true,
+    "supportsMultiVisualSelection": true,
+    "tooltips": {
+        "supportedTypes": {
+            "default": true,
+            "canvas": true
+        },
+        "roles": ["tooltips"]
+    },
+    "privileges": []
+}

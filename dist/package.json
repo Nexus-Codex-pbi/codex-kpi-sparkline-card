@@ -1,0 +1,17 @@
+{
+		"version": "1.0.0.0",
+		"author": {"name":"Neil Armstrong","email":"harmsolo13@gmail.com"},
+		"resources": [
+			{
+				"resourceId": "rId0",
+				"sourceType": 5,
+				"file": "resources/pbiKpiCard97601004C2B941D98D2D5B75A19ADB9D.pbiviz.json"
+			}
+		],
+		"visual": {"name":"pbiKpiCard","displayName":"KPI Card","guid":"pbiKpiCard97601004C2B941D98D2D5B75A19ADB9D","visualClassName":"Visual","version":"1.0.0.0","description":"A clean KPI card with optional target comparison and sparkline trend. Certification-ready.","supportUrl":"https://nexusai.nexus","gitHubUrl":""},
+		"metadata": {
+			"pbivizjson": {
+				"resourceId": "rId0"
+			}
+		}
+	}
