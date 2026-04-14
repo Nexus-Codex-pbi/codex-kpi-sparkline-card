@@ -19,6 +19,10 @@ export declare class Visual implements IVisual {
     private labelEl;
     private deltaEl;
     private sparklineContainer;
+    private currentSelectionId;
+    private sparklineSelectionIds;
+    private cardTooltipItems;
+    private sparklineDataPoints;
     constructor(options: VisualConstructorOptions);
     update(options: VisualUpdateOptions): void;
     private renderEmpty;

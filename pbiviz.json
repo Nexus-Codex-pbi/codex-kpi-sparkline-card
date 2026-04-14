@@ -1,18 +1,18 @@
 {
   "visual": {
-    "name": "pbiKpiCard",
-    "displayName": "KPI Card",
-    "guid": "pbiKpiCard97601004C2B941D98D2D5B75A19ADB9D",
+    "name": "codexKpiSparklineCard",
+    "displayName": "Codex KPI Sparkline Card",
+    "guid": "codexKpiSparklineCard97601004C2B941D98D2D5B75A19ADB9D",
     "visualClassName": "Visual",
     "version": "1.0.0.0",
     "description": "A clean KPI card with optional target comparison and sparkline trend. Certification-ready.",
-    "supportUrl": "https://nexusai.nexus",
+    "supportUrl": "https://nexuscodex.nexus/support",
     "gitHubUrl": ""
   },
-  "apiVersion": "5.9.1",
+  "apiVersion": "5.10.0",
   "author": {
-    "name": "Neil Armstrong",
-    "email": "harmsolo13@gmail.com"
+    "name": "Nexus Codex",
+    "email": "support@nexuscodex.nexus"
   },
   "assets": {
     "icon": "assets/icon.png"

@@ -29,6 +29,7 @@ declare class SparklineCardSettings extends FormattingSettingsCard {
     sparklineColor: formattingSettings.ColorPicker;
     lineWidth: formattingSettings.NumUpDown;
     showArea: formattingSettings.ToggleSwitch;
+    showAxisLabels: formattingSettings.ToggleSwitch;
     name: string;
     displayName: string;
     slices: Array<FormattingSettingsSlice>;

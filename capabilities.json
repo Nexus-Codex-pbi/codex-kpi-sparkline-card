@@ -22,6 +22,12 @@
             "displayName": "Sparkline Category",
             "name": "sparklineCategory",
             "kind": "Grouping"
+        },
+        {
+            "displayName": "Sort Order",
+            "name": "sortOrder",
+            "kind": "Measure",
+            "requiredTypes": [{ "numeric": true }]
         }
     ],
     "objects": {
@@ -88,6 +94,9 @@
                 },
                 "showArea": {
                     "type": { "bool": true }
+                },
+                "showAxisLabels": {
+                    "type": { "bool": true }
                 }
             }
         }
@@ -105,7 +114,8 @@
                     "select": [
                         { "bind": { "to": "measure" } },
                         { "bind": { "to": "target" } },
-                        { "bind": { "to": "sparkline" } }
+                        { "bind": { "to": "sparkline" } },
+                        { "bind": { "to": "sortOrder" } }
                     ]
                 }
             }
@@ -120,8 +130,7 @@
         "supportedTypes": {
             "default": true,
             "canvas": true
-        },
-        "roles": ["tooltips"]
+        }
     },
     "privileges": []
 }

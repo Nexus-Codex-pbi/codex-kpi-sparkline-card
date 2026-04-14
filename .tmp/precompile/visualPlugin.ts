@@ -5,11 +5,11 @@ import VisualConstructorOptions = powerbiVisualsApi.extensibility.visual.VisualC
 import DialogConstructorOptions = powerbiVisualsApi.extensibility.visual.DialogConstructorOptions;
 var powerbiKey: any = "powerbi";
 var powerbi: any = window[powerbiKey];
-var pbiKpiCard97601004C2B941D98D2D5B75A19ADB9D: IVisualPlugin = {
-    name: 'pbiKpiCard97601004C2B941D98D2D5B75A19ADB9D',
-    displayName: 'KPI Card',
+var codexKpiSparklineCard97601004C2B941D98D2D5B75A19ADB9D: IVisualPlugin = {
+    name: 'codexKpiSparklineCard97601004C2B941D98D2D5B75A19ADB9D',
+    displayName: 'Codex KPI Sparkline Card',
     class: 'Visual',
-    apiVersion: '5.9.0',
+    apiVersion: '5.10.0',
     create: (options?: VisualConstructorOptions) => {
         if (Visual) {
             return new Visual(options);
@@ -27,6 +27,6 @@ var pbiKpiCard97601004C2B941D98D2D5B75A19ADB9D: IVisualPlugin = {
 if (typeof powerbi !== "undefined") {
     powerbi.visuals = powerbi.visuals || {};
     powerbi.visuals.plugins = powerbi.visuals.plugins || {};
-    powerbi.visuals.plugins["pbiKpiCard97601004C2B941D98D2D5B75A19ADB9D"] = pbiKpiCard97601004C2B941D98D2D5B75A19ADB9D;
+    powerbi.visuals.plugins["codexKpiSparklineCard97601004C2B941D98D2D5B75A19ADB9D"] = codexKpiSparklineCard97601004C2B941D98D2D5B75A19ADB9D;
 }
-export default pbiKpiCard97601004C2B941D98D2D5B75A19ADB9D;
+export default codexKpiSparklineCard97601004C2B941D98D2D5B75A19ADB9D;

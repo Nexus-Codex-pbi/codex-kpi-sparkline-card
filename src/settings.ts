@@ -1,10 +1,14 @@
 "use strict";
 
+import powerbi from "powerbi-visuals-api";
+
 import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
 
 import FormattingSettingsCard = formattingSettings.SimpleCard;
 import FormattingSettingsSlice = formattingSettings.Slice;
 import FormattingSettingsModel = formattingSettings.Model;
+
+const ConstantOrRule = powerbi.VisualEnumerationInstanceKinds.ConstantOrRule;
 
 class ValueCardSettings extends FormattingSettingsCard {
     fontSize = new formattingSettings.NumUpDown({
@@ -17,19 +21,22 @@ class ValueCardSettings extends FormattingSettingsCard {
     valueColor = new formattingSettings.ColorPicker({
         name: "valueColor",
         displayName: "Value Color",
-        value: { value: "#333333" }
+        value: { value: "#333333" },
+        instanceKind: ConstantOrRule
     });
 
     labelColor = new formattingSettings.ColorPicker({
         name: "labelColor",
         displayName: "Label Color",
-        value: { value: "#767676" }
+        value: { value: "#767676" },
+        instanceKind: ConstantOrRule
     });
 
     backgroundColor = new formattingSettings.ColorPicker({
         name: "backgroundColor",
         displayName: "Background Color",
-        value: { value: "#FFFFFF" }
+        value: { value: "#FFFFFF" },
+        instanceKind: ConstantOrRule
     });
 
     displayUnits = new formattingSettings.ItemDropdown({
@@ -89,13 +96,15 @@ class TargetCardSettings extends FormattingSettingsCard {
     positiveColor = new formattingSettings.ColorPicker({
         name: "positiveColor",
         displayName: "Positive Color",
-        value: { value: "#107C10" }
+        value: { value: "#107C10" },
+        instanceKind: ConstantOrRule
     });
 
     negativeColor = new formattingSettings.ColorPicker({
         name: "negativeColor",
         displayName: "Negative Color",
-        value: { value: "#D13438" }
+        value: { value: "#D13438" },
+        instanceKind: ConstantOrRule
     });
 
     varianceType = new formattingSettings.ItemDropdown({
@@ -129,7 +138,8 @@ class SparklineCardSettings extends FormattingSettingsCard {
     sparklineColor = new formattingSettings.ColorPicker({
         name: "sparklineColor",
         displayName: "Line Color",
-        value: { value: "#0078D4" }
+        value: { value: "#0078D4" },
+        instanceKind: ConstantOrRule
     });
 
     lineWidth = new formattingSettings.NumUpDown({
@@ -144,13 +154,21 @@ class SparklineCardSettings extends FormattingSettingsCard {
         value: false
     });
 
+    showAxisLabels = new formattingSettings.ToggleSwitch({
+        name: "showAxisLabels",
+        displayName: "Show Axis Labels",
+        description: "Show first and last category labels below the sparkline",
+        value: false
+    });
+
     name: string = "sparklineCard";
     displayName: string = "Sparkline";
     slices: Array<FormattingSettingsSlice> = [
         this.showSparkline,
         this.sparklineColor,
         this.lineWidth,
-        this.showArea
+        this.showArea,
+        this.showAxisLabels
     ];
 }
 
