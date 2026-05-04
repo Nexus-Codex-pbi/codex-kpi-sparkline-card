@@ -72,6 +72,20 @@ class ValueCardSettings extends FormattingSettingsCard {
         value: ""
     });
 
+    valueAlign = new formattingSettings.AlignmentGroup({
+        name: "valueAlign",
+        displayName: "Value Alignment",
+        mode: powerbi.visuals.AlignmentGroupMode.Horizonal,
+        value: "center"
+    });
+
+    labelAlign = new formattingSettings.AlignmentGroup({
+        name: "labelAlign",
+        displayName: "Label Alignment",
+        mode: powerbi.visuals.AlignmentGroupMode.Horizonal,
+        value: "center"
+    });
+
     name: string = "valueCard";
     displayName: string = "Value";
     slices: Array<FormattingSettingsSlice> = [
@@ -82,7 +96,9 @@ class ValueCardSettings extends FormattingSettingsCard {
         this.displayUnits,
         this.decimalPlaces,
         this.showLabel,
-        this.labelText
+        this.labelText,
+        this.valueAlign,
+        this.labelAlign
     ];
 }
 
@@ -118,13 +134,21 @@ class TargetCardSettings extends FormattingSettingsCard {
         value: { displayName: "Percentage", value: "percentage" }
     });
 
+    targetAlign = new formattingSettings.AlignmentGroup({
+        name: "targetAlign",
+        displayName: "Target Alignment",
+        mode: powerbi.visuals.AlignmentGroupMode.Horizonal,
+        value: "center"
+    });
+
     name: string = "targetCard";
     displayName: string = "Target";
     slices: Array<FormattingSettingsSlice> = [
         this.showTarget,
         this.positiveColor,
         this.negativeColor,
-        this.varianceType
+        this.varianceType,
+        this.targetAlign
     ];
 }
 

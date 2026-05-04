@@ -4,10 +4,10 @@
     "displayName": "Codex KPI Sparkline Card",
     "guid": "codexKpiSparklineCard97601004C2B941D98D2D5B75A19ADB9D",
     "visualClassName": "Visual",
-    "version": "1.0.0.0",
+    "version": "1.1.0.0",
     "description": "A clean KPI card with optional target comparison and sparkline trend. Certification-ready.",
     "supportUrl": "https://nexuscodex.nexus/support",
-    "gitHubUrl": ""
+    "gitHubUrl": "https://github.com/Nexus-Codex-pbi/codex-kpi-sparkline-card"
   },
   "apiVersion": "5.10.0",
   "author": {
@@ -21,6 +21,8 @@
   "style": "style/visual.less",
   "capabilities": "capabilities.json",
   "dependencies": null,
-  "stringResources": ["en-US/resources.resjson"],
-  "version": "1.0.0.0"
+  "stringResources": [
+    "en-US/resources.resjson"
+  ],
+  "version": "1.1.0.0"
 }

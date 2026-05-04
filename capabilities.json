@@ -56,6 +56,14 @@
                 },
                 "labelText": {
                     "type": { "text": true }
+                },
+                "valueAlign": {
+                    "displayName": "Value Alignment",
+                    "type": { "formatting": { "alignment": true } }
+                },
+                "labelAlign": {
+                    "displayName": "Label Alignment",
+                    "type": { "formatting": { "alignment": true } }
                 }
             }
         },
@@ -78,6 +86,10 @@
                             { "displayName": "Both", "value": "both" }
                         ]
                     }
+                },
+                "targetAlign": {
+                    "displayName": "Target Alignment",
+                    "type": { "formatting": { "alignment": true } }
                 }
             }
         },

@@ -205,6 +205,7 @@ export class Visual implements IVisual {
             this.valueEl.textContent = formattedValue;
             this.valueEl.style.fontSize = valSettings.fontSize.value + "px";
             this.valueEl.style.color = valSettings.valueColor.value.value;
+            this.valueEl.style.textAlign = (valSettings.valueAlign?.value as string) || "center";
 
             // Label
             const measureName = measureCol.source.displayName;
@@ -212,6 +213,7 @@ export class Visual implements IVisual {
                 const labelText = valSettings.labelText.value || measureName;
                 this.labelEl.textContent = labelText;
                 this.labelEl.style.color = valSettings.labelColor.value.value;
+                this.labelEl.style.textAlign = (valSettings.labelAlign?.value as string) || "center";
                 this.labelEl.style.display = "";
             } else {
                 this.labelEl.style.display = "none";
@@ -243,6 +245,7 @@ export class Visual implements IVisual {
 
                     this.deltaEl.textContent = deltaText;
                     this.deltaEl.style.color = color;
+                    this.deltaEl.style.textAlign = (tgtSettings.targetAlign?.value as string) || "center";
                     this.deltaEl.style.display = "";
                 } else {
                     this.deltaEl.style.display = "none";

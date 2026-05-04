@@ -11,6 +11,8 @@ declare class ValueCardSettings extends FormattingSettingsCard {
     decimalPlaces: formattingSettings.NumUpDown;
     showLabel: formattingSettings.ToggleSwitch;
     labelText: formattingSettings.TextInput;
+    valueAlign: formattingSettings.AlignmentGroup;
+    labelAlign: formattingSettings.AlignmentGroup;
     name: string;
     displayName: string;
     slices: Array<FormattingSettingsSlice>;
@@ -20,6 +22,7 @@ declare class TargetCardSettings extends FormattingSettingsCard {
     positiveColor: formattingSettings.ColorPicker;
     negativeColor: formattingSettings.ColorPicker;
     varianceType: formattingSettings.ItemDropdown;
+    targetAlign: formattingSettings.AlignmentGroup;
     name: string;
     displayName: string;
     slices: Array<FormattingSettingsSlice>;
