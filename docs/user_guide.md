@@ -1,85 +1,67 @@
-# User Guide: pbiKpiCard
+# User Guide – Codex KPI Sparkline Card
 
-## Adding the Visual
-1. In Power BI Desktop, navigate to the Visualizations pane.
-2. Click the three dots (⋯) and select "Get more visuals".
-3. Search for "pbiKpiCard" or "Codex KPI Sparkline Card".
-4. Select the visual and click "Add".
-5. The visual icon will appear in the Visualizations pane. Click it to add an instance to your report.
+## Overview
+A clean KPI card with optional target comparison and sparkline trend. Displays a primary value (numeric or text) with a target indicator and a small sparkline showing historical trend.
 
-## Data Binding
-The visual supports the following data fields (drag fields from the Fields pane to these wells):
+## 1. Adding the Visual
+1. Import the `.pbiviz` file into Power BI Desktop
+2. Locate the visual in the Visualizations pane
+3. Drag it onto the report canvas
 
-| Field Name | Type | Required? | Description |
-|------------|------|-----------|-------------|
-| Value | Measure | Yes (numeric or text) | The primary KPI value to display (e.g. 23, 87.3%, $14,100, "Status"). Can be numeric or text. |
-| Target | Measure | No (numeric) | Target value for comparison (e.g. 100, 0.9). Must be numeric. |
-| Sparkline Values | Measure | No (numeric) | Numeric values for the sparkline trend chart (e.g. daily values over time). |
-| Sparkline Category | Grouping | No | Category for the sparkline (e.g. Date, Month). Provides the X-axis for the sparkline. |
-| Sort Order | Measure | No (numeric) | Numeric value to control the sort order of sparkline data points (ascending). |
+## 2. Data Binding
+- **Value** (Required): Primary metric to display (numeric or text). This is the main KPI value.
+- **Target** (Optional): Target value for comparison (numeric). If bound, shows a delta indicator.
+- **Sparkline Values** (Optional): Numeric values for the sparkline trend (e.g., historical values).
+- **Sparkline Category** (Optional): Category for the sparkline values (e.g., time periods). Each unique value creates a point in the sparkline.
+- **Sort Order** (Optional): Numeric value to control the order of sparkline points (ascending). If bound, points are sorted by this value.
 
-**Note**: At least the Value field must be bound to display a KPI. If Value is text, the Target, Sparkline Values, and Sort Order fields are ignored (as they require numeric data).
+## 3. Formatting Options
+**Value Card**
+- Font Size: Size of the value text.
+- Value Color: Colour of the value text.
+- Label Color: Colour of the label text.
+- Background Color: Background colour of the card.
+- Display Units: Units for numeric values (e.g., 0 for none, 1 for thousands, 2 for millions).
+- Decimal Places: Number of decimal places for numeric values.
+- Show Label: Toggle display of the label above the value.
+- Label Text: Custom label text (defaults to the measure name).
+- Value Alignment: Horizontal alignment of the value (left, center, right).
+- Label Alignment: Horizontal alignment of the label (left, center, right).
 
-## Formatting Options
-The visual provides extensive formatting options in the Format pane:
+**Target Card**
+- Show Target: Toggle visibility of the target delta indicator.
+- Positive Color: Colour when the value is above or equal to target (good).
+- Negative Color: Colour when the value is below target (bad).
+- Variance Type: How to show the variance: Percentage, Absolute, or Both.
+- Target Alignment: Horizontal alignment of the delta text (left, center, right).
 
-### Value Card
-- **Font Size**: Size of the value text in pixels.
-- **Value Color**: Color of the value text.
-- **Label Color**: Color of the label text (above the value).
-- **Background Color**: Background color of the card (transparent in high contrast mode).
-- **Display Units**: Units for displaying large numbers (e.g., 0, Thousands, Millions, Billions).
-- **Decimal Places**: Number of decimal places to show for numeric values.
-- **Show Label**: Toggle to display the label above the value.
-- **Label Text**: Custom label text (overrides the field name if set).
-- **Value Alignment**: Horizontal alignment of the value (Left, Center, Right).
-- **Label Alignment**: Horizontal alignment of the label (Left, Center, Right).
+**Sparkline Card**
+- Show Sparkline: Toggle visibility of the sparkline.
+- Sparkline Color: Colour of the sparkline line and area.
+- Line Width: Thickness of the sparkline line (px).
+- Show Area: Toggle fill area under the sparkline line.
+- Show Axis Labels: Toggle display of category labels below the sparkline (if sparkline category bound).
 
-### Target Card
-- **Show Target**: Toggle to display the target comparison.
-- **Positive Color**: Color for the delta when value is above target.
-- **Negative Color**: Color for the delta when value is below target.
-- **Variance Type**: How to display the difference:
-  - *Percentage*: Shows difference as a percentage (e.g., +5.2%).
-  - *Absolute*: Shows difference in the same units as the value (e.g., +5.2).
-  - *Both*: Shows both absolute and percentage (e.g., +5.2 (+5.2%)).
-- **Target Alignment**: Horizontal alignment of the delta (Left, Center, Right).
+## 4. Features
+- Displays a primary KPI value with optional label.
+- Optional target comparison showing variance as an arrow and percentage/absolute.
+- Optional sparkline trend showing historical values.
+- Tooltips on hover showing value, target, variance, and sparkline points.
+- Click the card to cross-filter other visuals by the sparkline category (if bound).
+- Right-click for context menu.
+- Supports high contrast mode and keyboard navigation.
+- Responsive font scaling for narrow containers.
+- Sparkline can show line only or line with area fill.
+- Sparkline axis labels can show categories (if bound).
 
-### Sparkline Card
-- **Show Sparkline**: Toggle to display the sparkline trend chart.
-- **Sparkline Color**: Color of the sparkline line/area.
-- **Sparkline Type**: Chart type for the sparkline:
-  - *Line*: Line chart.
-  - *Area*: Area chart (filled under the line).
-  - *Bar*: Bar chart.
-- **Line Width**: Width of the sparkline line in pixels.
-- **Show Dot**: Toggle to show a dot on the last data point.
-- **Dot Color**: Color of the dot on the last data point.
+## 5. Limitations
+- Only the first row of data is used for the Value and Target fields (additional rows are ignored).
+- Sparkline requires both Sparkline Values and Sparkline Category to be bound to display; otherwise, no sparkline is shown.
+- Sparkline Values must be numeric; non-numeric values are treated as zero.
+- Sparkline Category must be text; non-text values are converted to string.
+- Sort Order must be numeric; non-numeric values are placed at the end.
+- The visual does not support drill-through or hierarchical categories.
+- The sparkline is limited to the first 30,000 points (data reduction limit).
 
-## Features
-- **Flexible Value Display**: Shows numeric values (with formatting) or text values as the primary KPI.
-- **Target Comparison**: Optionally shows how the value compares to a target with color-coded delta (▲ for increase, ▼ for decrease).
-- **Sparkline Trend**: Optionally displays a mini trend chart showing historical values.
-- **Cross-Filtering**: Clicking the visual filters other visuals by the measure value (if Value is bound and numeric).
-- **Context Menu**: Right-click the visual to access the standard Power BI context menu (e.g., Sort, Export data).
-- **Tooltips**: Hover over the visual to see a tooltip with the value, target (if bound), and variance.
-- **High Contrast Mode**: Automatically adapts to Windows high contrast settings for improved accessibility.
-- **Responsive Design**: Value font size adjusts slightly in very narrow containers to prevent overflow.
-- **Text Support**: Can display text values (e.g., status labels) when the Value field contains non-numeric data.
-- **Sorting**: Bind a Sort Order field to control the order of points in the sparkline (ascending).
-
-## Limitations
-- The Value field supports only a single value (first row if multiple rows are bound).
-- The Target field must be numeric and supports only a single value.
-- The Sparkline Values field must be numeric and supports multiple values (for the trend chart).
-- The Sparkline Category field, if bound, must have the same granularity as Sparkline Values.
-- The visual does not support drill-through or drill-down.
-- The visual does not support conditional formatting via data fields.
-- The Sort Order field only supports ascending order; descending order is not supported.
-- When Value is text, the Target, Sparkline Values, and Sort Order fields are ignored (as they require numeric data).
-
-## Known Issues
-None reported.
-
-## Support URL
-For support, visit: https://nexuscodex.nexus/support
+## 6. Support
+For help or questions, visit https://nexuscodex.nexus/support
