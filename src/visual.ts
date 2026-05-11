@@ -2,6 +2,8 @@
 
 import powerbi from "powerbi-visuals-api";
 import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
+import { valueFormatter as vf } from "powerbi-visuals-utils-formattingutils";
+import { DisplayUnitSystemType } from "powerbi-visuals-utils-formattingutils/lib/src/displayUnitSystem/displayUnitSystemType";
 import { scaleLinear } from "d3-scale";
 import { line, area, curveMonotoneX } from "d3-shape";
 import "./../style/visual.less";
@@ -198,8 +200,9 @@ export class Visual implements IVisual {
             const isNumeric = typeof rawValue === "number" && !isNaN(rawValue);
             const displayUnits = valSettings.displayUnits.value.value as string;
             const decimals = valSettings.decimalPlaces.value;
+            const measureFormat = measureCol.source.format;
             const formattedValue = isNumeric
-                ? this.formatValue(rawValue as number, displayUnits, decimals)
+                ? this.formatValue(rawValue as number, displayUnits, decimals, measureFormat)
                 : String(rawValue);
 
             this.valueEl.textContent = formattedValue;
@@ -237,9 +240,9 @@ export class Visual implements IVisual {
                     if (varianceType === "percentage") {
                         deltaText = arrow + " " + Math.abs(pctDiff).toFixed(1) + "%";
                     } else if (varianceType === "absolute") {
-                        deltaText = arrow + " " + this.formatValue(Math.abs(diff), displayUnits, decimals);
+                        deltaText = arrow + " " + this.formatValue(Math.abs(diff), displayUnits, decimals, measureFormat);
                     } else {
-                        deltaText = arrow + " " + this.formatValue(Math.abs(diff), displayUnits, decimals)
+                        deltaText = arrow + " " + this.formatValue(Math.abs(diff), displayUnits, decimals, measureFormat)
                             + " (" + Math.abs(pctDiff).toFixed(1) + "%)";
                     }
 
@@ -316,7 +319,8 @@ export class Visual implements IVisual {
                         categoryLabels,
                         sparklineCol.source.displayName,
                         displayUnits,
-                        decimals
+                        decimals,
+                        sparklineCol.source.format
                     );
                 }
             }
@@ -356,39 +360,28 @@ export class Visual implements IVisual {
         this.sparklineContainer.appendChild(hint);
     }
 
-    private formatValue(value: number, units: string, decimals: number): string {
-        // "none" → raw value, no forced decimals, no scaling
-        if (units === "none") {
-            return String(value);
-        }
+    private formatValue(value: number, units: string, decimals: number, columnFormat?: string): string {
+        // Map our settings to valueFormatter inputs.
+        // - "none"   : Verbose system (always full number, locale separators, honors column format)
+        // - "auto"   : DataLabels system, sample value lets it auto-pick K/M/B
+        // - thousands/millions/billions : force the divisor via the sample value
+        const forcedUnit: number | undefined = {
+            thousands: 1e3,
+            millions: 1e6,
+            billions: 1e9,
+        }[units];
 
-        let displayValue = value;
-        let suffix = "";
+        const systemType = units === "none"
+            ? DisplayUnitSystemType.Verbose
+            : DisplayUnitSystemType.DataLabels;
 
-        if (units === "auto") {
-            const abs = Math.abs(value);
-            if (abs >= 1e9) {
-                displayValue = value / 1e9;
-                suffix = "B";
-            } else if (abs >= 1e6) {
-                displayValue = value / 1e6;
-                suffix = "M";
-            } else if (abs >= 1e3) {
-                displayValue = value / 1e3;
-                suffix = "K";
-            }
-        } else if (units === "thousands") {
-            displayValue = value / 1e3;
-            suffix = "K";
-        } else if (units === "millions") {
-            displayValue = value / 1e6;
-            suffix = "M";
-        } else if (units === "billions") {
-            displayValue = value / 1e9;
-            suffix = "B";
-        }
-
-        return displayValue.toFixed(decimals) + suffix;
+        const formatter = vf.create({
+            format: columnFormat,
+            value: forcedUnit !== undefined ? forcedUnit : value,
+            precision: decimals,
+            displayUnitSystemType: systemType,
+        });
+        return formatter.format(value);
     }
 
     private renderSparkline(
@@ -400,7 +393,8 @@ export class Visual implements IVisual {
         allCategoryLabels: string[],
         sparklineMeasureName: string,
         displayUnits: string,
-        decimals: number
+        decimals: number,
+        columnFormat?: string
     ): void {
         const width = this.sparklineContainer.clientWidth || 200;
         const showLabels = axisLabels && axisLabels.length > 1;
@@ -424,7 +418,7 @@ export class Visual implements IVisual {
         this.sparklineDataPoints = data.map((v, i) => ({
             value: v,
             category: allCategoryLabels[i] || "",
-            formatted: this.formatValue(v, displayUnits, decimals)
+            formatted: this.formatValue(v, displayUnits, decimals, columnFormat)
         }));
 
         const svgNs = "http://www.w3.org/2000/svg";
