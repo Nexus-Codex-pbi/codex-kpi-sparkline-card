@@ -357,41 +357,35 @@ export class Visual implements IVisual {
     }
 
     private formatValue(value: number, units: string, decimals: number): string {
+        // "none" → raw value, no forced decimals, no scaling
+        if (units === "none") {
+            return String(value);
+        }
+
         let displayValue = value;
         let suffix = "";
-        let scaled = false;
 
         if (units === "auto") {
             const abs = Math.abs(value);
             if (abs >= 1e9) {
                 displayValue = value / 1e9;
                 suffix = "B";
-                scaled = true;
             } else if (abs >= 1e6) {
                 displayValue = value / 1e6;
                 suffix = "M";
-                scaled = true;
             } else if (abs >= 1e3) {
                 displayValue = value / 1e3;
                 suffix = "K";
-                scaled = true;
             }
         } else if (units === "thousands") {
             displayValue = value / 1e3;
             suffix = "K";
-            scaled = true;
         } else if (units === "millions") {
             displayValue = value / 1e6;
             suffix = "M";
-            scaled = true;
         } else if (units === "billions") {
             displayValue = value / 1e9;
             suffix = "B";
-            scaled = true;
-        }
-
-        if (!scaled && Number.isInteger(displayValue)) {
-            return String(displayValue);
         }
 
         return displayValue.toFixed(decimals) + suffix;
