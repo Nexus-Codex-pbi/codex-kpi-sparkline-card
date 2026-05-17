@@ -90,7 +90,13 @@
         },
         "displayUnits": {
           "type": {
-            "numeric": true
+            "enumeration": [
+              { "displayName": "Auto", "value": "auto" },
+              { "displayName": "None", "value": "none" },
+              { "displayName": "Thousands (K)", "value": "thousands" },
+              { "displayName": "Millions (M)", "value": "millions" },
+              { "displayName": "Billions (B)", "value": "billions" }
+            ]
           },
           "displayName": "Display Units"
         },
