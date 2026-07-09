@@ -21,7 +21,11 @@ import ISandboxExtendedColorPalette = powerbi.extensibility.ISandboxExtendedColo
 import ILocalizationManager = powerbi.extensibility.ILocalizationManager;
 import DataView = powerbi.DataView;
 
+import { dataViewWildcard } from "powerbi-visuals-utils-dataviewutils";
+import { ColorHelper } from "powerbi-visuals-utils-colorutils";
+
 import { VisualFormattingSettingsModel } from "./settings";
+import { toRgba } from "../../_shared/formatting/colorHelpers";
 
 export class Visual implements IVisual {
     private target: HTMLElement;
@@ -134,11 +138,24 @@ export class Visual implements IVisual {
             const valSettings = this.formattingSettings.valueCardSettings;
             const tgtSettings = this.formattingSettings.targetCardSettings;
             const spkSettings = this.formattingSettings.sparklineCardSettings;
+            const background = this.formattingSettings.background;
 
-            // Apply background (skip in high contrast — let system handle it)
+            // Dedicated background layer (D-05: this.container is an inner
+            // div, never this.target/options.element). Reads the new shared
+            // Background card (colour + 0-100% transparency) through the
+            // frozen toRgba() wrapper. `?? default` on both reads means an
+            // OLD saved report (properties undefined) renders fully opaque
+            // white — pixel-identical to the pre-existing
+            // `valSettings.backgroundColor` default (D-06). The old
+            // valueCard.backgroundColor capability stays declared
+            // (untouched, so old reports that reference it don't break)
+            // but is no longer read at render, matching the pilot's swap
+            // pattern (skip in high contrast — let system handle it).
+            const bgHex = background.backgroundColor.value?.value ?? "#ffffff";
+            const bgTransparencyPct = background.transparency.value ?? 0;
             this.container.style.backgroundColor = this.isHighContrast
                 ? "transparent"
-                : valSettings.backgroundColor.value.value;
+                : toRgba(bgHex, bgTransparencyPct);
 
             // Clear sparkline
             while (this.sparklineContainer.firstChild) {
@@ -188,6 +205,29 @@ export class Visual implements IVisual {
                     .createSelectionId();
             }
 
+            // ─── Conditional formatting (fx) wiring — Value Color (TRANS-04) ──
+            // A bare `instanceKind: ConstantOrRule` declaration in settings.ts
+            // does not make the fx button functional on its own — it also
+            // needs a `selector` (dataViewWildcard, so a rule can match this
+            // measure's instances/totals) and an `altConstantSelector` bound
+            // to a concrete selectionId for the "set for all" swatch edit
+            // path. Resolved via the official ColorHelper.getColorForMeasure
+            // path against dataView.metadata.objects, matching the pilot's
+            // single-value (not per-category-row) fx pattern — this KPI's
+            // primary value is one aggregate reading, not a per-row series.
+            valSettings.valueColor.selector = dataViewWildcard.createDataViewWildcardSelector(
+                dataViewWildcard.DataViewWildcardMatchingOption.InstancesAndTotals
+            );
+            valSettings.valueColor.altConstantSelector = this.currentSelectionId
+                ? this.currentSelectionId.getSelector()
+                : undefined;
+            const valueColorHelper = new ColorHelper(
+                this.host.colorPalette,
+                { objectName: "valueCard", propertyName: "valueColor" },
+                valSettings.valueColor.value.value
+            );
+            const resolvedValueColor = valueColorHelper.getColorForMeasure(dataView.metadata?.objects, "measure");
+
             // Extract primary KPI value (first row or aggregate)
             const rawValue = measureCol.values[0];
             if (rawValue == null) {
@@ -207,7 +247,7 @@ export class Visual implements IVisual {
 
             this.valueEl.textContent = formattedValue;
             this.valueEl.style.fontSize = valSettings.fontSize.value + "px";
-            this.valueEl.style.color = valSettings.valueColor.value.value;
+            this.valueEl.style.color = resolvedValueColor;
             this.valueEl.style.textAlign = (valSettings.valueAlign?.value as string) || "center";
 
             // Label

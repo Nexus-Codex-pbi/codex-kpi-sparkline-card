@@ -8,6 +8,8 @@ import FormattingSettingsCard = formattingSettings.SimpleCard;
 import FormattingSettingsSlice = formattingSettings.Slice;
 import FormattingSettingsModel = formattingSettings.Model;
 
+import { BackgroundSettings } from "../../_shared/formatting/backgroundSettings";
+
 const ConstantOrRule = powerbi.VisualEnumerationInstanceKinds.ConstantOrRule;
 
 class ValueCardSettings extends FormattingSettingsCard {
@@ -200,6 +202,16 @@ export class VisualFormattingSettingsModel extends FormattingSettingsModel {
     valueCardSettings = new ValueCardSettings();
     targetCardSettings = new TargetCardSettings();
     sparklineCardSettings = new SparklineCardSettings();
+    background = new BackgroundSettings();
 
-    cards = [this.valueCardSettings, this.targetCardSettings, this.sparklineCardSettings];
+    // No transparency-default override here (unlike most of this batch):
+    // pbiKpiSparklineCard's PRE-EXISTING default was a genuine opaque-white
+    // paint — `this.container.style.backgroundColor` is set unconditionally
+    // on every update() call (before any data-presence check), reading
+    // `valueCardSettings.backgroundColor` (default "#FFFFFF"). The shared
+    // Background card's own default (opaque white, transparency 0) is
+    // pixel-identical to that pre-existing behaviour, so the raw shared
+    // default is correct as-is (D-06) — confirmed via direct code
+    // inspection of src/visual.ts's update(), not assumed.
+    cards = [this.valueCardSettings, this.targetCardSettings, this.sparklineCardSettings, this.background];
 }

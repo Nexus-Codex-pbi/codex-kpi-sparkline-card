@@ -91,11 +91,26 @@
         "displayUnits": {
           "type": {
             "enumeration": [
-              { "displayName": "Auto", "value": "auto" },
-              { "displayName": "None", "value": "none" },
-              { "displayName": "Thousands (K)", "value": "thousands" },
-              { "displayName": "Millions (M)", "value": "millions" },
-              { "displayName": "Billions (B)", "value": "billions" }
+              {
+                "displayName": "Auto",
+                "value": "auto"
+              },
+              {
+                "displayName": "None",
+                "value": "none"
+              },
+              {
+                "displayName": "Thousands (K)",
+                "value": "thousands"
+              },
+              {
+                "displayName": "Millions (M)",
+                "value": "millions"
+              },
+              {
+                "displayName": "Billions (B)",
+                "value": "billions"
+              }
             ]
           },
           "displayName": "Display Units"
@@ -233,6 +248,27 @@
         }
       },
       "displayName": "Sparkline Card"
+    },
+    "background": {
+      "displayName": "Background",
+      "properties": {
+        "backgroundColor": {
+          "displayName": "Background Colour",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "transparency": {
+          "displayName": "Transparency",
+          "type": {
+            "numeric": true
+          }
+        }
+      }
     }
   },
   "dataViewMappings": [
