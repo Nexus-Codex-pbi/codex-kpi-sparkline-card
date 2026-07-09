@@ -24,7 +24,7 @@ import DataView = powerbi.DataView;
 import { dataViewWildcard } from "powerbi-visuals-utils-dataviewutils";
 import { ColorHelper } from "powerbi-visuals-utils-colorutils";
 
-import { VisualFormattingSettingsModel } from "./settings";
+import { VisualFormattingSettingsModel, alignSelfFor, textAlignFor } from "./settings";
 import { toRgba } from "../../_shared/formatting/colorHelpers";
 
 export class Visual implements IVisual {
@@ -41,6 +41,7 @@ export class Visual implements IVisual {
 
     // DOM elements
     private container: HTMLElement;
+    private titleEl: HTMLElement;
     private valueEl: HTMLElement;
     private labelEl: HTMLElement;
     private deltaEl: HTMLElement;
@@ -76,6 +77,10 @@ export class Visual implements IVisual {
         this.container = document.createElement("div");
         this.container.className = "kpi-card";
 
+        this.titleEl = document.createElement("div");
+        this.titleEl.className = "kpi-title";
+        this.titleEl.style.display = "none";
+
         this.labelEl = document.createElement("div");
         this.labelEl.className = "kpi-label";
 
@@ -88,6 +93,7 @@ export class Visual implements IVisual {
         this.sparklineContainer = document.createElement("div");
         this.sparklineContainer.className = "kpi-sparkline";
 
+        this.container.appendChild(this.titleEl);
         this.container.appendChild(this.labelEl);
         this.container.appendChild(this.valueEl);
         this.container.appendChild(this.deltaEl);
@@ -135,10 +141,21 @@ export class Visual implements IVisual {
             // High contrast mode detection
             this.isHighContrast = this.colorPalette.isHighContrast;
 
+            const titleFmt = this.formattingSettings.titleSettings;
             const valSettings = this.formattingSettings.valueCardSettings;
             const tgtSettings = this.formattingSettings.targetCardSettings;
             const spkSettings = this.formattingSettings.sparklineCardSettings;
             const background = this.formattingSettings.background;
+
+            // ─── Text treatment (font family/weight/style/decoration,
+            // TEXT-01) — `?? default` reproduces each surface's PRE-EXISTING
+            // hardcoded style exactly when an old saved report has none of
+            // these new properties set (D-06): all three text surfaces
+            // (.kpi-label, .kpi-value, .kpi-delta) had a hardcoded
+            // font-weight in style/visual.less, so all three Bold toggles
+            // default true (weightFor idiom, matches pbiVarianceWaterfall/
+            // pbiNowVsThen precedent).
+            const weightFor = (bold: boolean | undefined, restWeight: string): string => bold ? "700" : restWeight;
 
             // Dedicated background layer (D-05: this.container is an inner
             // div, never this.target/options.element). Reads the new shared
@@ -198,6 +215,25 @@ export class Visual implements IVisual {
                 return;
             }
 
+            // ─── Title (iframe-internal, Policy 1180.2.5) ──────────────
+            if (titleFmt.showTitle.value && titleFmt.titleText.value) {
+                this.titleEl.textContent = String(titleFmt.titleText.value);
+                this.titleEl.style.color = this.isHighContrast
+                    ? (this.colorPalette.foreground?.value || titleFmt.titleColor.value.value)
+                    : titleFmt.titleColor.value.value;
+                this.titleEl.style.fontFamily = titleFmt.titleFontFamily.value || "Segoe UI, sans-serif";
+                this.titleEl.style.fontSize = `${titleFmt.titleFontSize.value}pt`;
+                this.titleEl.style.fontWeight = weightFor(titleFmt.titleBold.value, "400");
+                this.titleEl.style.fontStyle = titleFmt.titleItalic.value ? "italic" : "normal";
+                this.titleEl.style.textDecoration = titleFmt.titleUnderline.value ? "underline" : "none";
+                const titleAlignVal = String(titleFmt.titleAlign?.value || "left");
+                this.titleEl.style.alignSelf = alignSelfFor(titleAlignVal);
+                this.titleEl.style.textAlign = textAlignFor(titleAlignVal);
+                this.titleEl.style.display = "";
+            } else {
+                this.titleEl.style.display = "none";
+            }
+
             // Build selection ID for cross-filtering
             if (categories) {
                 this.currentSelectionId = this.host.createSelectionIdBuilder()
@@ -245,18 +281,31 @@ export class Visual implements IVisual {
                 ? this.formatValue(rawValue as number, displayUnits, decimals, measureFormat)
                 : String(rawValue);
 
+            const valueAlignVal = String(valSettings.valueAlign?.value || "center");
             this.valueEl.textContent = formattedValue;
+            this.valueEl.style.fontFamily = valSettings.fontFamily.value || "Segoe UI, sans-serif";
             this.valueEl.style.fontSize = valSettings.fontSize.value + "px";
+            this.valueEl.style.fontWeight = weightFor(valSettings.bold.value, "700");
+            this.valueEl.style.fontStyle = valSettings.italic.value ? "italic" : "normal";
+            this.valueEl.style.textDecoration = valSettings.underline.value ? "underline" : "none";
             this.valueEl.style.color = resolvedValueColor;
-            this.valueEl.style.textAlign = (valSettings.valueAlign?.value as string) || "center";
+            this.valueEl.style.alignSelf = alignSelfFor(valueAlignVal);
+            this.valueEl.style.textAlign = textAlignFor(valueAlignVal);
 
             // Label
             const measureName = measureCol.source.displayName;
             if (valSettings.showLabel.value) {
+                const labelAlignVal = String(valSettings.labelAlign?.value || "center");
                 const labelText = valSettings.labelText.value || measureName;
                 this.labelEl.textContent = labelText;
+                this.labelEl.style.fontFamily = valSettings.labelFontFamily.value || "Segoe UI, sans-serif";
+                this.labelEl.style.fontSize = valSettings.labelFontSize.value + "px";
+                this.labelEl.style.fontWeight = weightFor(valSettings.labelBold.value, "600");
+                this.labelEl.style.fontStyle = valSettings.labelItalic.value ? "italic" : "normal";
+                this.labelEl.style.textDecoration = valSettings.labelUnderline.value ? "underline" : "none";
                 this.labelEl.style.color = valSettings.labelColor.value.value;
-                this.labelEl.style.textAlign = (valSettings.labelAlign?.value as string) || "center";
+                this.labelEl.style.alignSelf = alignSelfFor(labelAlignVal);
+                this.labelEl.style.textAlign = textAlignFor(labelAlignVal);
                 this.labelEl.style.display = "";
             } else {
                 this.labelEl.style.display = "none";
@@ -286,9 +335,16 @@ export class Visual implements IVisual {
                             + " (" + Math.abs(pctDiff).toFixed(1) + "%)";
                     }
 
+                    const targetAlignVal = String(tgtSettings.targetAlign?.value || "center");
                     this.deltaEl.textContent = deltaText;
+                    this.deltaEl.style.fontFamily = tgtSettings.deltaFontFamily.value || "Segoe UI, sans-serif";
+                    this.deltaEl.style.fontSize = tgtSettings.deltaFontSize.value + "px";
+                    this.deltaEl.style.fontWeight = weightFor(tgtSettings.deltaBold.value, "600");
+                    this.deltaEl.style.fontStyle = tgtSettings.deltaItalic.value ? "italic" : "normal";
+                    this.deltaEl.style.textDecoration = tgtSettings.deltaUnderline.value ? "underline" : "none";
                     this.deltaEl.style.color = color;
-                    this.deltaEl.style.textAlign = (tgtSettings.targetAlign?.value as string) || "center";
+                    this.deltaEl.style.alignSelf = alignSelfFor(targetAlignVal);
+                    this.deltaEl.style.textAlign = textAlignFor(targetAlignVal);
                     this.deltaEl.style.display = "";
                 } else {
                     this.deltaEl.style.display = "none";
@@ -380,6 +436,7 @@ export class Visual implements IVisual {
     }
 
     private renderEmpty(): void {
+        this.titleEl.style.display = "none";
         this.valueEl.textContent = "--";
         this.valueEl.style.color = this.isHighContrast ? "" : "#999999";
         this.labelEl.style.display = "";

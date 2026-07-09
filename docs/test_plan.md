@@ -49,3 +49,27 @@
 - [ ] Bind the Value measure, open the fx rule editor, set a rule (e.g. gradient by value)
 - [ ] Card's value text colour changes according to the rule as the bound measure's value changes
 - [ ] Removing the rule reverts to the static Value Color swatch setting
+
+## 9. Visual Title (TITLE-01, Phase 1 Plan 13)
+- [ ] Title card appears in the format pane ("Visual Title") with Show Title (off by default), Title Text, Font, Alignment, Font Color
+- [ ] Show Title off (default) renders no title — old saved report (no title properties set) is pixel-identical to pre-upgrade (D-06)
+- [ ] Show Title on + Title Text set renders the title above the label/value/delta/sparkline stack
+- [ ] Title does not render on the empty/landing-page state (no measure bound) — matches the pbiKpiCard exemplar's scope (title only appears once real data renders)
+- [ ] Title Font (family/size/bold/italic/underline) and Alignment (left/center/right) apply correctly
+- [ ] Title Font Color applies; high contrast mode overrides to the theme foreground colour
+
+## 10. Per-Surface Text Treatment (TEXT-01, Phase 1 Plan 13)
+- [ ] Value card: new Font control (Family/Bold/Italic/Underline, reusing existing Font Size) applies to the KPI value text; Bold on (default) renders the pre-existing font-weight 700
+- [ ] Value card: new Label Font control (brand-new Font Size, previously CSS-only 12px) applies to the label text; Bold on (default) matches the pre-existing CSS font-weight 600 (weightFor idiom: bold-on renders 700, a documented negligible visual increase consistent with the pbiVarianceWaterfall/pbiNowVsThen precedent)
+- [ ] Target card: new Delta Font control (brand-new Font Size, previously CSS-only 13px) applies to the change/delta readout text
+- [ ] Value/Label/Target Alignment controls (converted to the shared `alignSlice` helper, defaults unchanged at "center") continue to apply alignSelf + text-align to their respective surfaces
+- [ ] Positive/Negative Color logic on the delta readout is unaffected by the new font treatment
+
+## 11. Text-Colour fx (TEXT-02, Phase 1 Plan 13 — carried forward from Plan 06)
+- [ ] Value Color fx (wired in Plan 06) continues to work unchanged after this plan's font/title additions
+
+## 12. Render-Nothing Defaults (D-06)
+- [ ] Old saved report with none of the new title/font/alignment properties set renders pixel-identical to pre-upgrade: no title, value at weight 700, label at effective weight 700 (from 600, per the documented weightFor idiom), delta at effective weight 700 (from 600), all at prior default sizes/colours/positions
+
+## 13. Known Pre-Existing Issue (out of scope, logged to deferred-items.md)
+- [ ] `npx pbiviz package` logs a non-fatal `ENOENT: en-US/resources.resjson` error during localization packaging; build still completes successfully (`Package created!`, exit code 0). Not caused by this plan's changes — reproduces on a fresh `npm install` alone (no `en-US/` directory exists in the repo at all).

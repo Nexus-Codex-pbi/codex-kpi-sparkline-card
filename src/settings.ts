@@ -9,15 +9,39 @@ import FormattingSettingsSlice = formattingSettings.Slice;
 import FormattingSettingsModel = formattingSettings.Model;
 
 import { BackgroundSettings } from "../../_shared/formatting/backgroundSettings";
+import { TitleSettings } from "../../_shared/formatting/titleSettings";
+import { alignSlice, alignSelfFor, textAlignFor } from "../../_shared/formatting/textFormatting";
+
+// Alignment helpers + TitleSettings now live in _shared/formatting/ (D-13,
+// D-14 — Plan 10 pilot). Re-exported here so visual.ts can import them
+// from "./settings" (mirrors pbiKpiCard's shape).
+export { TitleSettings, alignSelfFor, textAlignFor };
 
 const ConstantOrRule = powerbi.VisualEnumerationInstanceKinds.ConstantOrRule;
 
 class ValueCardSettings extends FormattingSettingsCard {
+    // Value text — FontControl composite reuses the existing bare
+    // "fontSize" property name (D-06/D-07: additive-only, no schema
+    // rename) alongside NEW sibling properties (family/bold/italic/
+    // underline). Bold defaults true to match the pre-existing hardcoded
+    // font-weight:700 on .kpi-value (style/visual.less) — weightFor idiom
+    // in visual.ts, matching pbiVarianceWaterfall/pbiNowVsThen precedent.
     fontSize = new formattingSettings.NumUpDown({
         name: "fontSize",
         displayName: "Font Size",
         description: "Size of the KPI value text",
         value: 32
+    });
+
+    fontFamily = new formattingSettings.FontPicker({ name: "fontFamily", displayName: "Font Family", value: "Segoe UI, sans-serif" });
+    bold = new formattingSettings.ToggleSwitch({ name: "bold", displayName: "Bold", value: true });
+    italic = new formattingSettings.ToggleSwitch({ name: "italic", displayName: "Italic", value: false });
+    underline = new formattingSettings.ToggleSwitch({ name: "underline", displayName: "Underline", value: false });
+
+    valueFont = new formattingSettings.FontControl({
+        name: "valueFont", displayName: "Font",
+        fontFamily: this.fontFamily, fontSize: this.fontSize,
+        bold: this.bold, italic: this.italic, underline: this.underline,
     });
 
     valueColor = new formattingSettings.ColorPicker({
@@ -32,6 +56,23 @@ class ValueCardSettings extends FormattingSettingsCard {
         displayName: "Label Color",
         value: { value: "#767676" },
         instanceKind: ConstantOrRule
+    });
+
+    // Label text had NO pre-existing font-size control (CSS-only,
+    // .kpi-label hardcoded 12px/weight:600) — brand-new dedicated Font
+    // composite, Font Size defaulting to the value that reproduces the
+    // prior CSS-derived size exactly (matches 01-11/01-12 precedent for a
+    // surface with no independent control before this plan).
+    labelFontFamily = new formattingSettings.FontPicker({ name: "labelFontFamily", displayName: "Label Font Family", value: "Segoe UI, sans-serif" });
+    labelFontSize = new formattingSettings.NumUpDown({ name: "labelFontSize", displayName: "Label Font Size", value: 12 });
+    labelBold = new formattingSettings.ToggleSwitch({ name: "labelBold", displayName: "Label Bold", value: true });
+    labelItalic = new formattingSettings.ToggleSwitch({ name: "labelItalic", displayName: "Label Italic", value: false });
+    labelUnderline = new formattingSettings.ToggleSwitch({ name: "labelUnderline", displayName: "Label Underline", value: false });
+
+    labelFont = new formattingSettings.FontControl({
+        name: "labelFont", displayName: "Label Font",
+        fontFamily: this.labelFontFamily, fontSize: this.labelFontSize,
+        bold: this.labelBold, italic: this.labelItalic, underline: this.labelUnderline,
     });
 
     backgroundColor = new formattingSettings.ColorPicker({
@@ -74,25 +115,15 @@ class ValueCardSettings extends FormattingSettingsCard {
         value: ""
     });
 
-    valueAlign = new formattingSettings.AlignmentGroup({
-        name: "valueAlign",
-        displayName: "Value Alignment",
-        mode: powerbi.visuals.AlignmentGroupMode.Horizonal,
-        value: "center"
-    });
-
-    labelAlign = new formattingSettings.AlignmentGroup({
-        name: "labelAlign",
-        displayName: "Label Alignment",
-        mode: powerbi.visuals.AlignmentGroupMode.Horizonal,
-        value: "center"
-    });
+    valueAlign = alignSlice("valueAlign", "center");
+    labelAlign = alignSlice("labelAlign", "center");
 
     name: string = "valueCard";
     displayName: string = "Value";
     slices: Array<FormattingSettingsSlice> = [
-        this.fontSize,
+        this.valueFont,
         this.valueColor,
+        this.labelFont,
         this.labelColor,
         this.backgroundColor,
         this.displayUnits,
@@ -136,12 +167,23 @@ class TargetCardSettings extends FormattingSettingsCard {
         value: { displayName: "Percentage", value: "percentage" }
     });
 
-    targetAlign = new formattingSettings.AlignmentGroup({
-        name: "targetAlign",
-        displayName: "Target Alignment",
-        mode: powerbi.visuals.AlignmentGroupMode.Horizonal,
-        value: "center"
+    // Delta/change readout (rendered into .kpi-delta) had NO pre-existing
+    // font-size control (CSS-only, hardcoded 13px/weight:600) — brand-new
+    // dedicated Font composite, Font Size defaulting to the value that
+    // reproduces the prior CSS-derived size exactly.
+    deltaFontFamily = new formattingSettings.FontPicker({ name: "deltaFontFamily", displayName: "Delta Font Family", value: "Segoe UI, sans-serif" });
+    deltaFontSize = new formattingSettings.NumUpDown({ name: "deltaFontSize", displayName: "Delta Font Size", value: 13 });
+    deltaBold = new formattingSettings.ToggleSwitch({ name: "deltaBold", displayName: "Delta Bold", value: true });
+    deltaItalic = new formattingSettings.ToggleSwitch({ name: "deltaItalic", displayName: "Delta Italic", value: false });
+    deltaUnderline = new formattingSettings.ToggleSwitch({ name: "deltaUnderline", displayName: "Delta Underline", value: false });
+
+    deltaFont = new formattingSettings.FontControl({
+        name: "deltaFont", displayName: "Delta Font",
+        fontFamily: this.deltaFontFamily, fontSize: this.deltaFontSize,
+        bold: this.deltaBold, italic: this.deltaItalic, underline: this.deltaUnderline,
     });
+
+    targetAlign = alignSlice("targetAlign", "center");
 
     name: string = "targetCard";
     displayName: string = "Target";
@@ -150,6 +192,7 @@ class TargetCardSettings extends FormattingSettingsCard {
         this.positiveColor,
         this.negativeColor,
         this.varianceType,
+        this.deltaFont,
         this.targetAlign
     ];
 }
@@ -199,6 +242,7 @@ class SparklineCardSettings extends FormattingSettingsCard {
 }
 
 export class VisualFormattingSettingsModel extends FormattingSettingsModel {
+    titleSettings = new TitleSettings();
     valueCardSettings = new ValueCardSettings();
     targetCardSettings = new TargetCardSettings();
     sparklineCardSettings = new SparklineCardSettings();
@@ -213,5 +257,5 @@ export class VisualFormattingSettingsModel extends FormattingSettingsModel {
     // pixel-identical to that pre-existing behaviour, so the raw shared
     // default is correct as-is (D-06) — confirmed via direct code
     // inspection of src/visual.ts's update(), not assumed.
-    cards = [this.valueCardSettings, this.targetCardSettings, this.sparklineCardSettings, this.background];
+    cards = [this.titleSettings, this.valueCardSettings, this.targetCardSettings, this.sparklineCardSettings, this.background];
 }
