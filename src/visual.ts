@@ -41,6 +41,7 @@ import { toRgba } from "./shared/colorHelpers";
 import { Theme } from "./shared/bandEngine";
 import { surfaceTokens, TABULAR_NUMS, RADII } from "./shared/designTokens";
 import { makeCornerBrackets, CardSignatureHandle } from "./shared/cardSignature";
+import { applyCardSignature } from "./shared/cardSignatureSettings";
 import { settle } from "./shared/motion";
 import { applyHighContrast, statusGlyph } from "./shared/highContrast";
 
@@ -311,9 +312,7 @@ export class Visual implements IVisual {
             valSettings.valueColor.selector = dataViewWildcard.createDataViewWildcardSelector(
                 dataViewWildcard.DataViewWildcardMatchingOption.InstancesAndTotals
             );
-            valSettings.valueColor.altConstantSelector = this.currentSelectionId
-                ? this.currentSelectionId.getSelector()
-                : undefined;
+            valSettings.valueColor.altConstantSelector = undefined; // card-level constant persistence: swatch edits apply to ALL instances + round-trip into the pane (first-instance binding persisted a row-0-only override); fx rules stay per-instance via the wildcard selector;
             const valueColorHelper = new ColorHelper(
                 this.host.colorPalette,
                 { objectName: "valueCard", propertyName: "valueColor" },
@@ -530,9 +529,10 @@ export class Visual implements IVisual {
             // constructor) — shares the SAME signal token as the delta
             // pill/endpoint dot, falling back to the muted neutral when
             // neither a target nor a usable sparkline trend produced one.
-            const cornerColor = hc.active ? hc.color : (signalHex ?? "#8f8ab8");
-            this.cornerSignature?.update(cornerColor, {
-                variant: "cornerBracket",
+            applyCardSignature(this.cornerSignature, this.formattingSettings.cardSignature, {
+                autoHex: signalHex ?? "#8f8ab8",
+                hcActive: hc.active,
+                hcColor: hc.color,
                 mirror: true,
                 glowMix: hc.active ? 0 : (theme === "dark" ? 55 : 0),
                 muted: false,
@@ -573,7 +573,7 @@ export class Visual implements IVisual {
         hint.textContent = "Drag a Value measure, then optionally add Target and Sparkline fields";
         this.sparklineContainer.appendChild(hint);
 
-        this.cornerSignature?.update("#8f8ab8", { variant: "cornerBracket", mirror: true, muted: true });
+        applyCardSignature(this.cornerSignature, this.formattingSettings?.cardSignature, { autoHex: "#8f8ab8", mirror: true, muted: true });
     }
 
     private formatValue(value: number, units: string, decimals: number, columnFormat?: string): string {

@@ -11,6 +11,7 @@ import FormattingSettingsModel = formattingSettings.Model;
 import { BackgroundSettings } from "./shared/backgroundSettings";
 import { TitleSettings } from "./shared/titleSettings";
 import { alignSlice, alignSelfFor, textAlignFor } from "./shared/textFormatting";
+import { CardSignatureSettings } from "./shared/cardSignatureSettings";
 
 // Alignment helpers + TitleSettings now live in _shared/formatting/ (D-13,
 // D-14 — Plan 10 pilot). Re-exported here so visual.ts can import them
@@ -249,6 +250,7 @@ class SparklineCardSettings extends FormattingSettingsCard {
 }
 
 export class VisualFormattingSettingsModel extends FormattingSettingsModel {
+    cardSignature = new CardSignatureSettings();
     titleSettings = new TitleSettings();
     valueCardSettings = new ValueCardSettings();
     targetCardSettings = new TargetCardSettings();
@@ -264,5 +266,7 @@ export class VisualFormattingSettingsModel extends FormattingSettingsModel {
     // pixel-identical to that pre-existing behaviour, so the raw shared
     // default is correct as-is (D-06) — confirmed via direct code
     // inspection of src/visual.ts's update(), not assumed.
-    cards = [this.titleSettings, this.valueCardSettings, this.targetCardSettings, this.sparklineCardSettings, this.background];
+    cards = [this.titleSettings, this.valueCardSettings, this.targetCardSettings, this.sparklineCardSettings, this.background,
+        this.cardSignature
+    ];
 }
