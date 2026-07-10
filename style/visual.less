@@ -60,5 +60,9 @@
     svg {
         display: block;
         width: 100%;
+        /* v2 board look (Plan 16): the endpoint dot's glow (drop-shadow
+           filter) extends a few px past the dot's own radius — default
+           SVG overflow:hidden would clip it at the viewBox edge. */
+        overflow: visible;
     }
 }

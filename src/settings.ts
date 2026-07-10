@@ -217,10 +217,17 @@ class SparklineCardSettings extends FormattingSettingsCard {
         value: 2
     });
 
+    // v2 board look (Plan 16): the "soft area fill under the line" is now
+    // part of the unified spark grammar shared with Sparkline Table (see
+    // Suite Enhancement Audit) — default flips true (this pre-existing
+    // toggle previously defaulted OFF). Still fully honoured either way:
+    // an explicit false is a real per-visual choice, an untouched
+    // property now ships the new default look (D-16 — same "new default,
+    // still-overridable toggle" precedent as every other v2 batch visual).
     showArea = new formattingSettings.ToggleSwitch({
         name: "showArea",
         displayName: "Show Area Fill",
-        value: false
+        value: true
     });
 
     showAxisLabels = new formattingSettings.ToggleSwitch({

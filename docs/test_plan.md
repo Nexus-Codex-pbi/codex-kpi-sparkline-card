@@ -73,3 +73,23 @@
 
 ## 13. Known Pre-Existing Issue (out of scope, logged to deferred-items.md)
 - [ ] `npx pbiviz package` logs a non-fatal `ENOENT: en-US/resources.resjson` error during localization packaging; build still completes successfully (`Package created!`, exit code 0). Not caused by this plan's changes — reproduces on a fresh `npm install` alone (no `en-US/` directory exists in the repo at all).
+
+## 14. v2 Board Look — Unified Spark Grammar (LOOK-02, Phase 1 Plan 16)
+- [ ] Sparkline → Show Area Fill: now defaults ON (soft area fill under the line at 15% opacity), still fully toggle-able off
+- [ ] A series with 2+ distinct values shows min/max "whisper ticks" — short muted vertical dashes at the lowest and highest data points (skipped when the series is flat, min===max)
+- [ ] The rightmost (latest) sparkline point renders a filled, glowing endpoint dot — NOT a plain uncoloured circle
+- [ ] Endpoint dot colour matches the delta pill colour when BOTH a Target measure and sparkline data are bound (same signal token, no visual disagreement)
+- [ ] With no Target measure bound (or Show Target off): the endpoint dot falls back to the sparkline's own last-vs-first trend direction (up → Positive Colour, down → Negative Colour)
+
+## 15. v2 Board Look — Delta Pill Matches KPI Card (LOOK-02)
+- [ ] Target/delta renders as a true pill (rounded background, arrow + text, matching pbiKpiCard's v2 delta pill grammar) — not plain coloured text
+- [ ] Pill background is a soft 15%-tint of the resolved Positive/Negative Colour; pill text/arrow is the full-strength colour
+- [ ] Changing Positive Colour / Negative Colour (existing pickers) is honoured immediately in the pill (D-16 — no property loss from the pill's new chrome)
+- [ ] Variance Display modes (Percentage / Absolute / Both) still compute the same text content as before, now inside the pill body
+
+## 16. v2 Board Look — Corner Brackets, Motion, High Contrast (LOOK-02)
+- [ ] A muted corner-bracket signature appears at top-left/bottom-right of the card on the empty/landing state
+- [ ] With data bound, the corner brackets re-tint to the SAME signal token as the delta pill / endpoint dot (target-vs-value, or sparkline trend fallback)
+- [ ] The KPI value settles (fades/slides in) once when its displayed text changes; a report with `prefers-reduced-motion` set shows the value with no animation
+- [ ] High contrast mode: corner brackets, delta pill, and area fill all render as flat system-foreground colour with a border/outline (no gradient, no glow); the endpoint dot is replaced by a ▲/▼ direction glyph (never colour-only); the delta pill's arrow is prefixed with a ✓/✕-style status glyph
+- [ ] D-16: Value/Label/Delta fonts, colours, alignment, Display Units, and Decimal Places all still resolve exactly as configured, layered under the new v2 chrome
