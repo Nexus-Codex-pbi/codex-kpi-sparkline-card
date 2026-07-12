@@ -276,9 +276,14 @@ export class Visual implements IVisual {
             // ─── Title (iframe-internal, Policy 1180.2.5) ──────────────
             if (titleFmt.showTitle.value && titleFmt.titleText.value) {
                 this.titleEl.textContent = String(titleFmt.titleText.value);
+                // Adaptive default (D-16 sentinel): untouched shared-Title navy
+                // swaps to the dark text token on dark surfaces.
+                const setTitle = titleFmt.titleColor.value.value;
+                const adaptiveTitle = setTitle === "#1a1a2e" && theme === "dark"
+                    ? surfaceTokens("dark").text : setTitle;
                 this.titleEl.style.color = this.isHighContrast
                     ? (this.colorPalette.foreground?.value || titleFmt.titleColor.value.value)
-                    : titleFmt.titleColor.value.value;
+                    : adaptiveTitle;
                 this.titleEl.style.fontFamily = titleFmt.titleFontFamily.value || "Segoe UI, sans-serif";
                 this.titleEl.style.fontSize = `${titleFmt.titleFontSize.value}pt`;
                 this.titleEl.style.fontWeight = weightFor(titleFmt.titleBold.value, "400");
