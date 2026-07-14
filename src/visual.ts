@@ -213,13 +213,41 @@ export class Visual implements IVisual {
             // the per-element alignment settings unchanged (D-06 parity).
             const editorial = String((valSettings.layoutStyle?.value as { value?: string })?.value || "centered") === "editorial";
             const alignFor = (v: string): string => editorial ? "flex-start" : alignSelfFor(v);
-            this.container.style.alignItems = editorial ? "flex-start" : "center";
             // Editorial: extra left inset so the headline stack breathes off
             // the left edge / corner bracket (Neil 2026-07-14). Safe as
             // container padding here — the contextmenu listener is on
             // this.target (not the container), so right-clicks in the padding
             // bubble up and still fire (verify-pbiviz confirms root+child).
             this.container.style.paddingLeft = editorial ? "22px" : "";
+
+            // ─── Editorial 2-column grid (Neil 2026-07-14 "too much real
+            // estate on the right"): headline stack in the LEFT column, the
+            // sparkline in the RIGHT column filling the empty upper-right —
+            // instead of the value/delta stranded top-left with the spark
+            // pinned full-width at the bottom. Title spans the top; the spark
+            // spans the eyebrow/value/delta rows and centres in its cell.
+            if (editorial) {
+                this.container.style.display = "grid";
+                this.container.style.gridTemplateColumns = "minmax(160px, 42%) 1fr";
+                this.container.style.columnGap = "22px";
+                this.container.style.alignContent = "center";
+                this.container.style.alignItems = "center";
+                this.titleEl.style.gridColumn = "1 / -1"; this.titleEl.style.gridRow = "1";
+                this.labelEl.style.gridColumn = "1"; this.labelEl.style.gridRow = "2";
+                this.valueEl.style.gridColumn = "1"; this.valueEl.style.gridRow = "3";
+                this.deltaEl.style.gridColumn = "1"; this.deltaEl.style.gridRow = "4";
+                this.sparklineContainer.style.gridColumn = "2";
+                this.sparklineContainer.style.gridRow = "2 / 5";
+                this.sparklineContainer.style.alignSelf = "center";
+            } else {
+                this.container.style.display = "flex";
+                this.container.style.alignItems = "center";
+                this.container.style.gridTemplateColumns = "";
+                for (const el of [this.titleEl, this.labelEl, this.valueEl, this.deltaEl, this.sparklineContainer]) {
+                    el.style.gridColumn = ""; el.style.gridRow = "";
+                }
+                this.sparklineContainer.style.alignSelf = "";
+            }
             const background = this.formattingSettings.background;
 
             // ─── Text treatment (font family/weight/style/decoration,
