@@ -443,13 +443,14 @@ export class Visual implements IVisual {
                     // corner far from the sparkline (Neil 2026-07-14).
                     this.labelEl.style.display = "flex";
                     this.labelEl.style.alignItems = "center";
-                    this.labelEl.style.width = "100%";
-                    this.labelEl.style.alignSelf = "stretch";
-                    // In-flow (static) so it rides the eyebrow flex row rather
-                    // than the CSS absolute top-right corner; margin-left auto
-                    // pushes it to the row's right end.
+                    this.labelEl.style.width = "";
+                    this.labelEl.style.alignSelf = "flex-start";
+                    // In-flow (static) so it rides the eyebrow row, and sits
+                    // RIGHT NEXT TO the eyebrow text (8px gap) — not pushed to
+                    // the far card edge, which read as detached on a wide tile
+                    // (Neil 2026-07-14 "the dot is still cooked").
                     this.statusDotEl.style.position = "static";
-                    this.statusDotEl.style.marginLeft = "auto";
+                    this.statusDotEl.style.marginLeft = "8px";
                     this.statusDotEl.style.flex = "0 0 auto";
                     this.labelEl.appendChild(this.statusDotEl);
                 } else {
@@ -775,7 +776,7 @@ export class Visual implements IVisual {
                 grad.setAttribute("id", gradId);
                 grad.setAttribute("x1", "0"); grad.setAttribute("y1", "0");
                 grad.setAttribute("x2", "0"); grad.setAttribute("y2", "1");
-                const stops: Array<[string, string]> = [["0", "0.42"], ["1", "0.04"]];
+                const stops: Array<[string, string]> = [["0", "0.72"], ["0.5", "0.34"], ["1", "0.07"]];
                 for (const [off, op] of stops) {
                     const s = document.createElementNS(svgNs, "stop");
                     s.setAttribute("offset", off);
@@ -808,7 +809,8 @@ export class Visual implements IVisual {
         // Neon glow on dark (Neil 2026-07-14 "could be more neon") — a soft
         // signal-hue halo around the line; dropped on light + HC.
         if (isDark) {
-            linePath.style.filter = `drop-shadow(0 0 3px color-mix(in srgb, ${color} 70%, transparent))`;
+            // Double halo = a brighter neon glow (Neil 2026-07-14 "more neon").
+            linePath.style.filter = `drop-shadow(0 0 2px ${color}) drop-shadow(0 0 7px color-mix(in srgb, ${color} 65%, transparent))`;
         }
 
         svg.appendChild(linePath);
