@@ -12,6 +12,7 @@ import { BackgroundSettings } from "./shared/backgroundSettings";
 import { TitleSettings } from "./shared/titleSettings";
 import { alignSlice, alignSelfFor, textAlignFor } from "./shared/textFormatting";
 import { CardSignatureSettings } from "./shared/cardSignatureSettings";
+import { BorderSettings } from "./shared/borderSettings";
 
 // Alignment helpers + TitleSettings now live in _shared/formatting/ (D-13,
 // D-14 — Plan 10 pilot). Re-exported here so visual.ts can import them
@@ -256,6 +257,7 @@ export class VisualFormattingSettingsModel extends FormattingSettingsModel {
     targetCardSettings = new TargetCardSettings();
     sparklineCardSettings = new SparklineCardSettings();
     background = new BackgroundSettings();
+    visualBorder = new BorderSettings();
 
     // No transparency-default override here (unlike most of this batch):
     // pbiKpiSparklineCard's PRE-EXISTING default was a genuine opaque-white
@@ -267,6 +269,6 @@ export class VisualFormattingSettingsModel extends FormattingSettingsModel {
     // default is correct as-is (D-06) — confirmed via direct code
     // inspection of src/visual.ts's update(), not assumed.
     cards = [this.titleSettings, this.valueCardSettings, this.targetCardSettings, this.sparklineCardSettings, this.background,
-        this.cardSignature
+        this.cardSignature, this.visualBorder
     ];
 }

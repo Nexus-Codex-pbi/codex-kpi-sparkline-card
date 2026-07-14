@@ -44,6 +44,7 @@ import { makeCornerBrackets, CardSignatureHandle } from "./shared/cardSignature"
 import { applyCardSignature } from "./shared/cardSignatureSettings";
 import { settle } from "./shared/motion";
 import { applyHighContrast, statusGlyph } from "./shared/highContrast";
+import { applyBorder } from "./shared/borderSettings";
 
 /** Luminance-based theme pick (matches the pbiKpiCard v3 pilot's own
  * 0.55 threshold convention). This visual's pre-existing default IS an
@@ -228,9 +229,29 @@ export class Visual implements IVisual {
                 : toRgba(bgHex, bgTransparencyPct);
 
             // v3: theme pick + the single HC fallback rule, computed once
-            // and reused everywhere colour is resolved below.
-            const theme: Theme = themeFor(bgHex);
+            // and reused everywhere colour is resolved below. Theme-source
+            // ladder: a painted Background governs; else the report-theme
+            // palette background, so a dark report theme adapts the card even
+            // when the container is left transparent.
+            const bgPainted = (bgTransparencyPct ?? 0) < 100;
+            const governingBg = bgPainted ? bgHex : ((this.colorPalette as any)?.background?.value ?? bgHex);
+            const theme: Theme = themeFor(governingBg);
             const hc = applyHighContrast(this.colorPalette, { fallbackColor: "#8f8ab8" });
+
+            // Visual's own Border card — CSS border on the card container so it
+            // wraps the whole card; Corner Radius rounds it (overflow hidden so
+            // the radius clips). Applied here (container is persistent; children
+            // are cleared each render). fx colour via metadata objects.
+            this.container.style.boxSizing = "border-box";
+            if (this.formattingSettings.visualBorder?.show?.value) {
+                this.container.style.overflow = "hidden";
+            }
+            applyBorder(this.container, this.formattingSettings.visualBorder, {
+                hcActive: hc.active,
+                hcColor: hc.color,
+                palette: this.colorPalette,
+                metadataObjects: dataView?.metadata?.objects,
+            });
 
             // Clear sparkline
             while (this.sparklineContainer.firstChild) {
@@ -318,12 +339,20 @@ export class Visual implements IVisual {
                 dataViewWildcard.DataViewWildcardMatchingOption.InstancesAndTotals
             );
             valSettings.valueColor.altConstantSelector = undefined; // card-level constant persistence: swatch edits apply to ALL instances + round-trip into the pane (first-instance binding persisted a row-0-only override); fx rules stay per-instance via the wildcard selector;
+            // D-16 adaptive seed: the untouched dark default swaps to the light
+            // text token on dark surfaces so the hero value never renders
+            // dark-on-dark. An fx rule still resolves through the ColorHelper;
+            // HC forces system foreground.
+            const valueSeed = valSettings.valueColor.value.value === "#333333" && theme === "dark"
+                ? surfaceTokens("dark").text : valSettings.valueColor.value.value;
             const valueColorHelper = new ColorHelper(
                 this.host.colorPalette,
                 { objectName: "valueCard", propertyName: "valueColor" },
-                valSettings.valueColor.value.value
+                valueSeed
             );
-            const resolvedValueColor = valueColorHelper.getColorForMeasure(dataView.metadata?.objects, "measure");
+            const resolvedValueColor = hc.active
+                ? hc.color
+                : valueColorHelper.getColorForMeasure(dataView.metadata?.objects, "measure");
 
             // Extract primary KPI value (first row or aggregate)
             const rawValue = measureCol.values[0];
@@ -375,7 +404,11 @@ export class Visual implements IVisual {
                 this.labelEl.style.fontWeight = weightFor(valSettings.labelBold.value, "600");
                 this.labelEl.style.fontStyle = valSettings.labelItalic.value ? "italic" : "normal";
                 this.labelEl.style.textDecoration = valSettings.labelUnderline.value ? "underline" : "none";
-                this.labelEl.style.color = valSettings.labelColor.value.value;
+                // D-16 adaptive: untouched grey eyebrow swaps to the muted
+                // light token on dark surfaces; HC wins; user-set honoured.
+                this.labelEl.style.color = hc.active ? hc.color
+                    : (valSettings.labelColor.value.value === "#767676" && theme === "dark"
+                        ? surfaceTokens("dark").muted : valSettings.labelColor.value.value);
                 this.labelEl.style.alignSelf = alignSelfFor(labelAlignVal);
                 this.labelEl.style.textAlign = textAlignFor(labelAlignVal);
                 this.labelEl.style.display = "";
@@ -754,7 +787,7 @@ export class Visual implements IVisual {
         // Render first and last category labels below the sparkline
         if (showLabels) {
             const labelY = sparkHeight + labelHeight - 2;
-            const labelColor = this.isHighContrast ? "" : "#767676";
+            const labelColor = this.isHighContrast ? "" : surfaceTokens(v3.theme).muted;
 
             const firstLabel = document.createElementNS(svgNs, "text");
             firstLabel.setAttribute("x", String(padding));
