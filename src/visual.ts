@@ -542,9 +542,18 @@ export class Visual implements IVisual {
                         signalHex = isPositive ? resolvedPositive : resolvedNegative;
                     }
 
+                    // Band-tinted spark (v2 board grammar + Neil "more neon"
+                    // 2026-07-14): when the sparkline colour is left at its
+                    // default blue, the line/area follow the SIGNAL colour
+                    // (neon lime on-target / red off-track), matching the
+                    // board. A user-set colour is honoured verbatim.
+                    const SPARK_DEFAULT = "#0078D4";
+                    const sparkUserColor = spkSettings.sparklineColor.value.value;
+                    const effectiveSparkColor = (sparkUserColor === SPARK_DEFAULT && signalHex)
+                        ? signalHex : sparkUserColor;
                     this.renderSparkline(
                         sparkData,
-                        spkSettings.sparklineColor.value.value,
+                        effectiveSparkColor,
                         spkSettings.lineWidth.value,
                         spkSettings.showArea.value,
                         spkSettings.showAxisLabels.value ? categoryLabels : null,
@@ -683,13 +692,14 @@ export class Visual implements IVisual {
         svg.setAttribute("viewBox", "0 0 " + width + " " + totalHeight);
 
         // v2 board look (Plan 16 — unified spark grammar, shared with
-        // Sparkline Table): soft area fill under the line — showArea now
-        // defaults ON (settings.ts) as part of that shared grammar, still
-        // fully toggle-able (D-16). Uses the line's own configured colour
-        // (`color`), never the v3 signal token — the line/area is the
-        // user's chosen series colour; the signal token is reserved for
-        // the endpoint dot / delta pill / corner bracket only.
-        if (showArea) {
+        // Sparkline Table): soft area fill under the line. `color` is now the
+        // band-tinted signal colour by default (set at the call site), so the
+        // fill glows in the signal hue. On DARK the fill is a bolder vertical
+        // gradient (Neil 2026-07-14 "in darkmode the fill could be bolder") —
+        // ~0.42 at the line fading to ~0.04 at the baseline; on light it stays
+        // the softer flat 0.15. HC drops the fill entirely.
+        const isDark = v3.theme === "dark" && !v3.hc.active;
+        if (showArea && !v3.hc.active) {
             const areaGen = area<number>()
                 .x((_d, i) => xScale(i))
                 .y0(sparkHeight - padding)
@@ -698,8 +708,28 @@ export class Visual implements IVisual {
 
             const areaPath = document.createElementNS(svgNs, "path");
             areaPath.setAttribute("d", areaGen(data) || "");
-            areaPath.setAttribute("fill", v3.hc.active ? "none" : color);
-            areaPath.setAttribute("fill-opacity", "0.15");
+            if (isDark) {
+                const gradId = "codex-spark-fill";
+                const defs = document.createElementNS(svgNs, "defs");
+                const grad = document.createElementNS(svgNs, "linearGradient");
+                grad.setAttribute("id", gradId);
+                grad.setAttribute("x1", "0"); grad.setAttribute("y1", "0");
+                grad.setAttribute("x2", "0"); grad.setAttribute("y2", "1");
+                const stops: Array<[string, string]> = [["0", "0.42"], ["1", "0.04"]];
+                for (const [off, op] of stops) {
+                    const s = document.createElementNS(svgNs, "stop");
+                    s.setAttribute("offset", off);
+                    s.setAttribute("stop-color", color);
+                    s.setAttribute("stop-opacity", op);
+                    grad.appendChild(s);
+                }
+                defs.appendChild(grad);
+                svg.appendChild(defs);
+                areaPath.setAttribute("fill", `url(#${gradId})`);
+            } else {
+                areaPath.setAttribute("fill", color);
+                areaPath.setAttribute("fill-opacity", "0.15");
+            }
             svg.appendChild(areaPath);
         }
 
@@ -713,6 +743,13 @@ export class Visual implements IVisual {
         linePath.setAttribute("fill", "none");
         linePath.setAttribute("stroke", v3.hc.active ? v3.hc.color : color);
         linePath.setAttribute("stroke-width", String(strokeWidth));
+        linePath.setAttribute("stroke-linecap", "round");
+        linePath.setAttribute("stroke-linejoin", "round");
+        // Neon glow on dark (Neil 2026-07-14 "could be more neon") — a soft
+        // signal-hue halo around the line; dropped on light + HC.
+        if (isDark) {
+            linePath.style.filter = `drop-shadow(0 0 3px color-mix(in srgb, ${color} 70%, transparent))`;
+        }
 
         svg.appendChild(linePath);
 

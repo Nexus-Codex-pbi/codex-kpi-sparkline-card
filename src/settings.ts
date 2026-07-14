@@ -127,7 +127,12 @@ class ValueCardSettings extends FormattingSettingsCard {
         this.valueColor,
         this.labelFont,
         this.labelColor,
-        this.backgroundColor,
+        // this.backgroundColor — HIDDEN from the pane (Neil 2026-07-14: "2
+        // background settings"). This legacy Value-card background is dead
+        // (no longer read at render; the shared Background card governs the
+        // card fill). Property stays DECLARED in capabilities so old saved
+        // reports that reference it don't break, but it's removed from the
+        // slices so only one Background control shows.
         this.displayUnits,
         this.decimalPlaces,
         this.showLabel,
