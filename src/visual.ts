@@ -224,6 +224,10 @@ export class Visual implements IVisual {
             // this.target, so right-clicks in the padding bubble up and still
             // fire (verify-pbiviz confirms root+child).
             this.container.style.paddingLeft = leftLayout ? "22px" : "";
+            // Symmetric right inset so the sparkline doesn't run right up to the
+            // bare edge while the headline sits inset on the left — balances the
+            // left-aligned layouts (Neil 2026-07-14 "too much right").
+            this.container.style.paddingRight = leftLayout ? "22px" : "";
 
             if (split) {
                 // Split: headline stack in the LEFT column, sparkline in the
