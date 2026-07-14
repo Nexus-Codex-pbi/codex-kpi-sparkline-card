@@ -211,22 +211,23 @@ export class Visual implements IVisual {
             // Editorial layout (board look): left-align the headline stack and
             // show the top-right signal status dot. Centered (default) keeps
             // the per-element alignment settings unchanged (D-06 parity).
-            const editorial = String((valSettings.layoutStyle?.value as { value?: string })?.value || "centered") === "editorial";
-            const alignFor = (v: string): string => editorial ? "flex-start" : alignSelfFor(v);
-            // Editorial: extra left inset so the headline stack breathes off
-            // the left edge / corner bracket (Neil 2026-07-14). Safe as
-            // container padding here — the contextmenu listener is on
-            // this.target (not the container), so right-clicks in the padding
-            // bubble up and still fire (verify-pbiviz confirms root+child).
-            this.container.style.paddingLeft = editorial ? "22px" : "";
+            // Three layouts (Neil 2026-07-14): Centered (default), Editorial
+            // (left-aligned stack, full-width spark), Split (headline left /
+            // trend right, 2-col grid). editorial+split both left-align.
+            const layout = String((valSettings.layoutStyle?.value as { value?: string })?.value || "centered");
+            const editorial = layout === "editorial";
+            const split = layout === "split";
+            const leftLayout = editorial || split;
+            const alignFor = (v: string): string => leftLayout ? "flex-start" : alignSelfFor(v);
+            // Left inset so the headline breathes off the edge / corner bracket.
+            // Safe as container padding — the contextmenu listener is on
+            // this.target, so right-clicks in the padding bubble up and still
+            // fire (verify-pbiviz confirms root+child).
+            this.container.style.paddingLeft = leftLayout ? "22px" : "";
 
-            // ─── Editorial 2-column grid (Neil 2026-07-14 "too much real
-            // estate on the right"): headline stack in the LEFT column, the
-            // sparkline in the RIGHT column filling the empty upper-right —
-            // instead of the value/delta stranded top-left with the spark
-            // pinned full-width at the bottom. Title spans the top; the spark
-            // spans the eyebrow/value/delta rows and centres in its cell.
-            if (editorial) {
+            if (split) {
+                // Split: headline stack in the LEFT column, sparkline in the
+                // RIGHT column filling the space; title spans the top.
                 this.container.style.display = "grid";
                 this.container.style.gridTemplateColumns = "minmax(160px, 42%) 1fr";
                 this.container.style.columnGap = "22px";
@@ -239,14 +240,19 @@ export class Visual implements IVisual {
                 this.sparklineContainer.style.gridColumn = "2";
                 this.sparklineContainer.style.gridRow = "2 / 5";
                 this.sparklineContainer.style.alignSelf = "center";
+                this.sparklineContainer.style.width = "100%";
             } else {
+                // Centered / Editorial: flex column. Clear any grid placement.
                 this.container.style.display = "flex";
-                this.container.style.alignItems = "center";
+                this.container.style.alignItems = leftLayout ? "flex-start" : "center";
                 this.container.style.gridTemplateColumns = "";
                 for (const el of [this.titleEl, this.labelEl, this.valueEl, this.deltaEl, this.sparklineContainer]) {
                     el.style.gridColumn = ""; el.style.gridRow = "";
                 }
                 this.sparklineContainer.style.alignSelf = "";
+                // Editorial's spark goes full-width (CSS is 80%, which left-
+                // aligned would dump all 20% on the right); centered keeps 80%.
+                this.sparklineContainer.style.width = editorial ? "100%" : "";
             }
             const background = this.formattingSettings.background;
 
@@ -464,7 +470,7 @@ export class Visual implements IVisual {
                     : (valSettings.labelColor.value.value === "#767676" && theme === "dark"
                         ? surfaceTokens("dark").muted : valSettings.labelColor.value.value);
                 this.labelEl.style.textAlign = textAlignFor(labelAlignVal);
-                if (editorial) {
+                if (leftLayout) {
                     // Eyebrow row (board look): text flush-left, signal dot
                     // pushed to the content's right edge on the SAME line —
                     // grounds the dot instead of floating it in the card
@@ -668,9 +674,9 @@ export class Visual implements IVisual {
             });
 
             // Editorial-layout status dot (board look) — same signal token as
-            // the pill/endpoint/brackets; a glowing bead top-right. Hidden in
-            // the centered layout.
-            if (editorial) {
+            // the pill/endpoint/brackets; a glowing bead on the eyebrow row.
+            // Shown in the left layouts (editorial + split), hidden in centered.
+            if (leftLayout) {
                 const dotHex = hc.active ? hc.color : (signalHex ?? "#8f8ab8");
                 this.statusDotEl.style.display = "block";
                 this.statusDotEl.style.background = hc.active

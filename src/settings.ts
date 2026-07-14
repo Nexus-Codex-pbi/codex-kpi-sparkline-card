@@ -31,6 +31,7 @@ class ValueCardSettings extends FormattingSettingsCard {
         items: [
             { value: "centered", displayName: "Centered" },
             { value: "editorial", displayName: "Editorial (left)" },
+            { value: "split", displayName: "Split (trend right)" },
         ],
         value: { value: "centered", displayName: "Centered" },
     });
