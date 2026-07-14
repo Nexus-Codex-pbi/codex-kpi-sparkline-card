@@ -214,6 +214,12 @@ export class Visual implements IVisual {
             const editorial = String((valSettings.layoutStyle?.value as { value?: string })?.value || "centered") === "editorial";
             const alignFor = (v: string): string => editorial ? "flex-start" : alignSelfFor(v);
             this.container.style.alignItems = editorial ? "flex-start" : "center";
+            // Editorial: extra left inset so the headline stack breathes off
+            // the left edge / corner bracket (Neil 2026-07-14). Safe as
+            // container padding here — the contextmenu listener is on
+            // this.target (not the container), so right-clicks in the padding
+            // bubble up and still fire (verify-pbiviz confirms root+child).
+            this.container.style.paddingLeft = editorial ? "22px" : "";
             const background = this.formattingSettings.background;
 
             // ─── Text treatment (font family/weight/style/decoration,
@@ -413,7 +419,12 @@ export class Visual implements IVisual {
             if (valSettings.showLabel.value) {
                 const labelAlignVal = String(valSettings.labelAlign?.value || "center");
                 const labelText = valSettings.labelText.value || measureName;
-                this.labelEl.textContent = labelText;
+                // Eyebrow text lives in a span so the editorial status dot can
+                // ride the SAME row as a sibling (textContent would wipe it).
+                this.labelEl.textContent = "";
+                const labelSpan = document.createElement("span");
+                labelSpan.textContent = labelText;
+                this.labelEl.appendChild(labelSpan);
                 this.labelEl.style.fontFamily = valSettings.labelFontFamily.value || "Segoe UI, sans-serif";
                 this.labelEl.style.fontSize = valSettings.labelFontSize.value + "px";
                 this.labelEl.style.fontWeight = weightFor(valSettings.labelBold.value, "600");
@@ -424,9 +435,28 @@ export class Visual implements IVisual {
                 this.labelEl.style.color = hc.active ? hc.color
                     : (valSettings.labelColor.value.value === "#767676" && theme === "dark"
                         ? surfaceTokens("dark").muted : valSettings.labelColor.value.value);
-                this.labelEl.style.alignSelf = alignFor(labelAlignVal);
                 this.labelEl.style.textAlign = textAlignFor(labelAlignVal);
-                this.labelEl.style.display = "";
+                if (editorial) {
+                    // Eyebrow row (board look): text flush-left, signal dot
+                    // pushed to the content's right edge on the SAME line —
+                    // grounds the dot instead of floating it in the card
+                    // corner far from the sparkline (Neil 2026-07-14).
+                    this.labelEl.style.display = "flex";
+                    this.labelEl.style.alignItems = "center";
+                    this.labelEl.style.width = "100%";
+                    this.labelEl.style.alignSelf = "stretch";
+                    // In-flow (static) so it rides the eyebrow flex row rather
+                    // than the CSS absolute top-right corner; margin-left auto
+                    // pushes it to the row's right end.
+                    this.statusDotEl.style.position = "static";
+                    this.statusDotEl.style.marginLeft = "auto";
+                    this.statusDotEl.style.flex = "0 0 auto";
+                    this.labelEl.appendChild(this.statusDotEl);
+                } else {
+                    this.labelEl.style.display = "";
+                    this.labelEl.style.width = "";
+                    this.labelEl.style.alignSelf = alignFor(labelAlignVal);
+                }
             } else {
                 this.labelEl.style.display = "none";
             }
