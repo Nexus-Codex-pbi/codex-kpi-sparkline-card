@@ -38,7 +38,7 @@ import { toRgba } from "./shared/colorHelpers";
 // Negative Colour pickers (never a raw bandEngine hex) so a user's
 // custom colours still resolve (D-16) — the corner bracket, sparkline
 // endpoint dot, and delta pill all share this single resolved hex.
-import { Theme } from "./shared/bandEngine";
+import { Theme, directionColor } from "./shared/bandEngine";
 import { surfaceTokens, TABULAR_NUMS, RADII } from "./shared/designTokens";
 import { makeCornerBrackets, CardSignatureHandle } from "./shared/cardSignature";
 import { applyCardSignature } from "./shared/cardSignatureSettings";
@@ -501,8 +501,16 @@ export class Visual implements IVisual {
             let deltaText = "";
             let isPositive: boolean | null = null;
             let signalHex: string | null = null;
-            const resolvedPositive = tgtSettings.positiveColor.value.value;
-            const resolvedNegative = tgtSettings.negativeColor.value.value;
+            // Neon signal defaults (Neil 2026-07-14): the untouched Microsoft
+            // green/red defaults swap to the board's neon direction-law tokens
+            // (lime #8aff2b / magenta), theme-aware. This flows to the delta
+            // pill, endpoint dot, corner brackets, status dot AND the spark
+            // line/fill (which follow signalHex when their colour is default).
+            // A user-set colour is honoured verbatim.
+            const resolvedPositive = tgtSettings.positiveColor.value.value === "#107C10"
+                ? directionColor(1, theme) : tgtSettings.positiveColor.value.value;
+            const resolvedNegative = tgtSettings.negativeColor.value.value === "#D13438"
+                ? directionColor(-1, theme) : tgtSettings.negativeColor.value.value;
 
             if (isNumeric && targetCol && tgtSettings.showTarget.value) {
                 targetValue = targetCol.values[0] as number;
