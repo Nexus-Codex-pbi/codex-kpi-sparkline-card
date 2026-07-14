@@ -78,6 +78,7 @@ export class Visual implements IVisual {
     private deltaEl: HTMLElement;
     private deltaArrow: HTMLElement;
     private deltaTextNode: Text;
+    private statusDotEl: HTMLElement;
     private sparklineContainer: HTMLElement;
 
     // v3 card signature — one corner-bracket pair for the whole card.
@@ -140,11 +141,18 @@ export class Visual implements IVisual {
         this.sparklineContainer = document.createElement("div");
         this.sparklineContainer.className = "kpi-sparkline";
 
+        // Editorial-layout signal status dot — absolute top-right, hidden
+        // unless the Editorial layout is chosen (Neil 2026-07-14 board look).
+        this.statusDotEl = document.createElement("div");
+        this.statusDotEl.className = "kpi-status-dot";
+        this.statusDotEl.style.display = "none";
+
         this.container.appendChild(this.titleEl);
         this.container.appendChild(this.labelEl);
         this.container.appendChild(this.valueEl);
         this.container.appendChild(this.deltaEl);
         this.container.appendChild(this.sparklineContainer);
+        this.container.appendChild(this.statusDotEl);
         this.target.appendChild(this.container);
 
         // Corner-bracket card signature — appended last (by
@@ -199,6 +207,13 @@ export class Visual implements IVisual {
             const valSettings = this.formattingSettings.valueCardSettings;
             const tgtSettings = this.formattingSettings.targetCardSettings;
             const spkSettings = this.formattingSettings.sparklineCardSettings;
+
+            // Editorial layout (board look): left-align the headline stack and
+            // show the top-right signal status dot. Centered (default) keeps
+            // the per-element alignment settings unchanged (D-06 parity).
+            const editorial = String((valSettings.layoutStyle?.value as { value?: string })?.value || "centered") === "editorial";
+            const alignFor = (v: string): string => editorial ? "flex-start" : alignSelfFor(v);
+            this.container.style.alignItems = editorial ? "flex-start" : "center";
             const background = this.formattingSettings.background;
 
             // ─── Text treatment (font family/weight/style/decoration,
@@ -311,7 +326,7 @@ export class Visual implements IVisual {
                 this.titleEl.style.fontStyle = titleFmt.titleItalic.value ? "italic" : "normal";
                 this.titleEl.style.textDecoration = titleFmt.titleUnderline.value ? "underline" : "none";
                 const titleAlignVal = String(titleFmt.titleAlign?.value || "left");
-                this.titleEl.style.alignSelf = alignSelfFor(titleAlignVal);
+                this.titleEl.style.alignSelf = alignFor(titleAlignVal);
                 this.titleEl.style.textAlign = textAlignFor(titleAlignVal);
                 this.titleEl.style.display = "";
             } else {
@@ -380,7 +395,7 @@ export class Visual implements IVisual {
             this.valueEl.style.textDecoration = valSettings.underline.value ? "underline" : "none";
             this.valueEl.style.color = resolvedValueColor;
             this.valueEl.style.fontFeatureSettings = TABULAR_NUMS;
-            this.valueEl.style.alignSelf = alignSelfFor(valueAlignVal);
+            this.valueEl.style.alignSelf = alignFor(valueAlignVal);
             this.valueEl.style.textAlign = textAlignFor(valueAlignVal);
 
             // v3 motion: settle the value once when its displayed text
@@ -409,7 +424,7 @@ export class Visual implements IVisual {
                 this.labelEl.style.color = hc.active ? hc.color
                     : (valSettings.labelColor.value.value === "#767676" && theme === "dark"
                         ? surfaceTokens("dark").muted : valSettings.labelColor.value.value);
-                this.labelEl.style.alignSelf = alignSelfFor(labelAlignVal);
+                this.labelEl.style.alignSelf = alignFor(labelAlignVal);
                 this.labelEl.style.textAlign = textAlignFor(labelAlignVal);
                 this.labelEl.style.display = "";
             } else {
@@ -468,7 +483,7 @@ export class Visual implements IVisual {
                     this.deltaEl.style.fontStyle = tgtSettings.deltaItalic.value ? "italic" : "normal";
                     this.deltaEl.style.textDecoration = tgtSettings.deltaUnderline.value ? "underline" : "none";
                     this.deltaEl.style.color = pillHex;
-                    this.deltaEl.style.alignSelf = alignSelfFor(targetAlignVal);
+                    this.deltaEl.style.alignSelf = alignFor(targetAlignVal);
                 } else {
                     this.deltaEl.style.display = "none";
                 }
@@ -584,6 +599,21 @@ export class Visual implements IVisual {
                 glowMix: hc.active ? 0 : (theme === "dark" ? 55 : 0),
                 muted: false,
             });
+
+            // Editorial-layout status dot (board look) — same signal token as
+            // the pill/endpoint/brackets; a glowing bead top-right. Hidden in
+            // the centered layout.
+            if (editorial) {
+                const dotHex = hc.active ? hc.color : (signalHex ?? "#8f8ab8");
+                this.statusDotEl.style.display = "block";
+                this.statusDotEl.style.background = hc.active
+                    ? hc.color
+                    : `radial-gradient(circle at 35% 30%, color-mix(in srgb, ${dotHex} 35%, white), ${dotHex} 55%, color-mix(in srgb, ${dotHex} 55%, black))`;
+                this.statusDotEl.style.boxShadow = (theme === "dark" && !hc.active)
+                    ? `0 0 8px color-mix(in srgb, ${dotHex} 55%, transparent)` : "none";
+            } else {
+                this.statusDotEl.style.display = "none";
+            }
 
             // Responsive font scaling
             const viewportWidth = options.viewport.width;

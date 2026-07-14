@@ -52,6 +52,21 @@
   "objects": {
     "valueCard": {
       "properties": {
+        "layoutStyle": {
+          "displayName": "Layout",
+          "type": {
+            "enumeration": [
+              {
+                "value": "centered",
+                "displayName": "Centered"
+              },
+              {
+                "value": "editorial",
+                "displayName": "Editorial (left)"
+              }
+            ]
+          }
+        },
         "fontSize": {
           "type": {
             "numeric": true

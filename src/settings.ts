@@ -22,6 +22,19 @@ export { TitleSettings, alignSelfFor, textAlignFor };
 const ConstantOrRule = powerbi.VisualEnumerationInstanceKinds.ConstantOrRule;
 
 class ValueCardSettings extends FormattingSettingsCard {
+    // Layout mode (Neil 2026-07-14): keep the centered look OR the board's
+    // editorial left-aligned layout with a top-right signal status dot.
+    // Default "centered" preserves every existing saved report (D-06).
+    layoutStyle = new formattingSettings.ItemDropdown({
+        name: "layoutStyle",
+        displayName: "Layout",
+        items: [
+            { value: "centered", displayName: "Centered" },
+            { value: "editorial", displayName: "Editorial (left)" },
+        ],
+        value: { value: "centered", displayName: "Centered" },
+    });
+
     // Value text — FontControl composite reuses the existing bare
     // "fontSize" property name (D-06/D-07: additive-only, no schema
     // rename) alongside NEW sibling properties (family/bold/italic/
@@ -123,6 +136,7 @@ class ValueCardSettings extends FormattingSettingsCard {
     name: string = "valueCard";
     displayName: string = "Value";
     slices: Array<FormattingSettingsSlice> = [
+        this.layoutStyle,
         this.valueFont,
         this.valueColor,
         this.labelFont,
